@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Artify | Help Centre</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .help-intro {
+            padding: 48px;
+            border-radius: 24px;
+            background: linear-gradient(130deg, #d6dfc5, #f0d4bf);
+        }
+
+        .help-intro h1 {
+            font-size: clamp(2.4rem, 6vw, 4.5rem);
+            color: #2f2921;
+            letter-spacing: -0.05em;
+        }
+
+        .help-intro p {
+            color: #3e3a31;
+            max-width: 700px;
+            line-height: 1.8;
+        }
+
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 28px 0;
+        }
+
+        .help-card {
+            border: 1px solid var(--line);
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 25px;
+        }
+
+        .help-icon {
+            font-size: 2.2rem;
+        }
+
+        .help-card p,
+        .help-card li {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .help-card ul {
+            padding-left: 20px;
+        }
+
+        .help-search {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            margin: 24px 0;
+        }
+
+        .help-faq details {
+            padding: 18px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .help-faq summary {
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .help-faq p {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        @media (max-width: 680px) {
+            .help-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .help-intro {
+                padding: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container page-pad">
+
+        <!-- Help Centre Introduction -->
+        <section class="help-intro">
+
+            <div class="eyebrow">WE'RE HERE TO HELP</div>
+
+            <h1>A little help goes a long way.</h1>
+
+            <p>
+                Something not working as expected? Choose the topic
+                closest to your issue, try the quick steps, or use
+                the contact page to reach the Artify team. This is
+                a sample store, so payments are simulated and no
+                real payment is taken.
+            </p>
+
+            <a class="btn" href="contact.html">
+                Contact Artify 
+            </a>
+
+        </section>
+
+        <!-- Help Search -->
+        <input
+            class="help-search"
+            id="helpSearch"
+            type="search"
+            placeholder="Search help topics, e.g. payment, cancelled order…"
+            aria-label="Search help topics"
+        >
+
+        <!-- Help Topic Cards -->
+        <section class="help-grid" id="helpCards">
+
+            <!-- Payment Issues -->
+            <article class="help-card">
+
+                <span class="help-icon">💳</span>
+
+                <h2>Payment issues</h2>
+
+                <p>
+                    Checkout is a demo flow, not a real payment gateway.
+                </p>
+
+                <ul>
+                    <li>
+                        If checkout does not continue, check that your
+                        delivery address is filled in.
+                    </li>
+
+                    <li>
+                        For UPI, card or net-banking demo methods, enter
+                        a placeholder reference only — never enter real
+                        card details.
+                    </li>
+
+                    <li>
+                        If the page says it cannot connect, run the
+                        Node.js server and open Artify through
+                        localhost:3000.
+                    </li>
+
+                    <li>
+                        If an order appears after checkout, the demo
+                        payment step was recorded as successful.
+                    </li>
+                </ul>
+
+            </article>
+
+            <!-- Orders and Delivery -->
+            <article class="help-card">
+
+                <span class="help-icon">📦</span>
+
+                <h2>Orders &amp; delivery</h2>
+
+                <ul>
+                    <li>
+                        Open <a href="orders.html">My Orders</a> to see
+                        orders linked to your account.
+                    </li>
+
+                    <li>
+                        Use <a href="track-order.html">Track Order</a>
+                        and enter the order ID shown in your order history.
+                    </li>
+
+                    <li>
+                        If the order is missing, sign in with the same
+                        email/mobile account used at checkout.
+                    </li>
+
+                    <li>
+                        Tracking milestones are illustrative in this
+                        demo; they are not live courier updates.
+                    </li>
+                </ul>
+
+            </article>
+
+            <!-- Cancellation Issues -->
+            <article class="help-card">
+
+                <span class="help-icon">↩️</span>
+
+                <h2>Cancellation issues</h2>
+
+                <ul>
+                    <li>
+                        Open your order history and use the cancel option
+                        for an eligible confirmed order.
+                    </li>
+
+                    <li>
+                        Cancelled orders remain in your history so you
+                        can review what happened.
+                    </li>
+
+                    <li>
+                        Since payments are simulated, the demo does not
+                        issue a real refund.
+                    </li>
+
+                    <li>
+                        If a cancellation button is unavailable, the
+                        order may already be cancelled or no longer eligible.
+                    </li>
+                </ul>
+
+            </article>
+
+            <!-- Login and Account -->
+            <article class="help-card">
+
+                <span class="help-icon">🔐</span>
+
+                <h2>Login &amp; account</h2>
+
+                <ul>
+                    <li>
+                        You can log in using the email address or mobile
+                        number associated with your account.
+                    </li>
+
+                    <li>
+                        Make sure the password is the one used when
+                        registering.
+                    </li>
+
+                    <li>
+                        This demo does not send OTPs or password-reset
+                        messages.
+                    </li>
+
+                    <li>
+                        Keep your password private and do not reuse
+                        important account passwords.
+                    </li>
+                </ul>
+
+            </article>
+
+            <!-- Cart and Wishlist -->
+            <article class="help-card">
+
+                <span class="help-icon">♡</span>
+
+                <h2>Cart &amp; wishlist</h2>
+
+                <ul>
+                    <li>
+                        Use the heart on a product to add or remove it
+                        from your wishlist.
+                    </li>
+
+                    <li>
+                        Cart and wishlist changes show a message and
+                        are saved in this browser.
+                    </li>
+
+                    <li>
+                        If the count looks old, refresh the page.
+                        Private browsing may not preserve saved items.
+                    </li>
+
+                    <li>
+                        Make sure the item is still available in the
+                        product collection.
+                    </li>
+                </ul>
+
+            </article>
+
+            <!-- Product and Custom Art -->
+            <article class="help-card">
+
+                <span class="help-icon">🎨</span>
+
+                <h2>Product &amp; custom art</h2>
+
+                <ul>
+                    <li>
+                        Search by product name or category and refine
+                        results using filters.
+                    </li>
+
+                    <li>
+                        Switch between grid and list views to browse
+                        your way.
+                    </li>
+
+                    <li>
+                        For custom art, describe the idea, style,
+                        preferred budget and useful details.
+                    </li>
+
+                    <li>
+                        Product pictures and prices in this demo are
+                        sample catalogue data.
+                    </li>
+                </ul>
+
+            </article>
+
+        </section>
+
+        <!-- Frequently Asked Questions -->
+        <section class="info-card help-faq">
+
+            <div class="eyebrow">QUICK ANSWERS</div>
+
+            <h2>Still wondering?</h2>
+
+            <details>
+                <summary>
+                    Why does my payment say demo or sample?
+                </summary>
+
+                <p>
+                    Artify records a simulated payment method and
+                    reference; it does not connect to a bank or
+                    payment provider.
+                </p>
+            </details>
+
+            <details>
+                <summary>
+                    Can I use Artify from another device?
+                </summary>
+
+                <p>
+                    Accounts and orders are saved in the server-side
+                    demo database, but cart, wishlist and theme
+                    preferences are stored in the browser. This is
+                    not a production multi-device account system.
+                </p>
+            </details>
+
+            <details>
+                <summary>
+                    How do I report a bug?
+                </summary>
+
+                <p>
+                    Visit Contact and include the page name, what you
+                    clicked, what you expected and what happened.
+                    Never send your password or real payment information.
+                </p>
+            </details>
+
+            <p style="margin-top: 20px;">
+                <a class="btn" href="contact.html">
+                    Get more help
+                </a>
+            </p>
+
+        </section>
+
+    </main>
+
+    <!-- JavaScript Files -->
+    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            simplePage();
+
+            const input = document.getElementById('helpSearch');
+
+            input.addEventListener('input', () => {
+
+                const q = input.value.toLowerCase();
+
+                document
+                    .querySelectorAll('#helpCards .help-card')
+                    .forEach(card => {
+
+                        card.hidden = !card.innerText
+                            .toLowerCase()
+                            .includes(q);
+
+                    });
+
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

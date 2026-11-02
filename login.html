@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Artify | Login
+  </title>
+  <link href="style.css" rel="stylesheet"/>
+ 
+  <style>
+    /* Small page-specific polish; complex reusable layouts live in style.css. */
+    .page-heading p { margin-top: 6px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent, #a65a3d); outline-offset: 3px; }
+  </style>
+</head>
+ <body>
+  <main>
+   <div class="auth-wrap">
+    <section class="auth-art">
+     <div>
+      <span>
+       🎨
+      </span>
+      <h2>
+       Bring handmade into everyday life.
+      </h2>
+      <p>
+       One account for your wishlist, cart, custom art and orders.
+      </p>
+     </div>
+    </section>
+    <section class="auth-card">
+     <div class="eyebrow">
+      YOUR ARTIFY ACCOUNT
+     </div>
+     <h1>
+      Welcome back
+     </h1>
+     <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login">
+       Login
+      </button>
+      <button class="auth-tab" data-mode="register">
+       Create Account
+      </button>
+     </div>
+     <form id="authForm">
+     </form>
+    </section>
+   </div>
+  </main>
+  <script src="products.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+ 
+
+  <script>
+    async function loginPage(){
+      base(); const form=$('#authForm'), tabs=$$('.auth-tab'); let mode='login';
+      const draw=()=>{form.innerHTML=mode==='login'?`<label for="identifier">Email address</label><input id="identifier" name="identifier" type="email" autocomplete="username" required placeholder="you@example.com"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required minlength="6"><button class="btn full">Login to Artify</button><p class="form-hint">Please confirm your email address before logging in.</p>`:`<label for="registerName">Full name</label><input id="registerName" name="name" required placeholder="Your name"><label for="registerEmail">Email address</label><input id="registerEmail" name="email" type="email" required placeholder="you@example.com"><label for="registerPhone">Mobile number</label><input id="registerPhone" name="phone" type="tel" placeholder="10-digit mobile number"><label for="registerPassword">Create password</label><input id="registerPassword" name="password" type="password" required minlength="6" placeholder="At least 6 characters"><label for="registerAddress">Delivery address (optional)</label><textarea id="registerAddress" name="address" placeholder="Delivery address"></textarea><button class="btn full">Create My Account ✦</button><p class="form-hint">A confirmation link will be sent to your email. Open it before logging in.</p>`;};
+      tabs.forEach(t=>t.addEventListener('click',()=>{mode=t.dataset.mode;tabs.forEach(x=>x.classList.toggle('active',x===t));draw();}));
+      form.addEventListener('submit',async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(form));try{if(!window.artifySupabase)return toast('Add your Supabase URL and Publishable key in supabase-config.js first.');if(mode==='register'){const {data,error}=await artifySupabase.auth.signUp({email:d.email,password:d.password,options:{emailRedirectTo:location.origin+location.pathname.replace(/[^/]*$/,'')+'login.html',data:{name:d.name,phone:d.phone||'',address:d.address||''}}});if(error)return toast(error.message);toast('Confirmation email sent. Please verify your email, then log in.');return;}const {data,error}=await artifySupabase.auth.signInWithPassword({email:d.identifier,password:d.password});if(error)return toast(error.message);if(!data.user.email_confirmed_at){await artifySupabase.auth.signOut();return toast('Please confirm your email first.');}const {data:profile,error:pe}=await artifySupabase.from('artify_user_data').select('*').eq('user_id',data.user.id).maybeSingle();if(pe)return toast(pe.message);const u={id:data.user.id,email:data.user.email,...(profile?.profile||data.user.user_metadata||{})};currentUser=u;localStorage.setItem('artify_user',JSON.stringify(u));toast('Welcome to Artify!');setTimeout(()=>go('profile.html'),350);}catch(err){toast(err.message||'Unable to connect to Supabase.');}});draw();
+    }
+    document.addEventListener('DOMContentLoaded',loginPage);
+  </script>
+
+ </body>
+</html>

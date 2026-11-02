@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Artify | All Products
+  </title>
+  <link href="style.css" rel="stylesheet"/>
+ 
+  <style>
+    /* Small page-specific polish; complex reusable layouts live in style.css. */
+    .page-heading p { margin-top: 6px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent, #a65a3d); outline-offset: 3px; }
+  </style>
+</head>
+<script src="products.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+ <body>
+  <main>
+   <div class="page-heading">
+    <div>
+     <div class="eyebrow">
+      THE COLLECTION
+     </div>
+     <h1>
+      All Products
+     </h1>
+     <p class="muted" id="resultCount">
+     </p>
+    </div>
+   </div>
+   <div class="category-row" id="categoryButtons">
+   </div>
+   <div class="toolbar">
+    <input class="search" id="search" placeholder="Search by product name..." type="search"/>
+    <select id="price">
+     <option value="999999">
+      Any price
+     </option>
+     <option value="250">
+      Under ₹250
+     </option>
+     <option value="300">
+      Under ₹300
+     </option>
+     <option value="500">
+      Under ₹500
+     </option>
+     <option value="699">
+      Under ₹699
+     </option>
+    </select>
+    <select id="rating">
+     <option value="0">
+      Any rating
+     </option>
+     <option value="4.5">
+      4.5+ rating
+     </option>
+     <option value="4.7">
+      4.7+ rating
+     </option>
+    </select>
+    <select id="sort">
+     <option value="default">
+      Sort by
+     </option>
+     <option value="low">
+      Price: Low to High
+     </option>
+     <option value="high">
+      Price: High to Low
+     </option>
+     <option value="rating">
+      Top Rated
+     </option>
+     <option value="name">
+      Name A–Z
+     </option>
+    </select>
+    <button class="btn secondary small" id="gridBtn">
+     ▦ Grid
+    </button>
+    <button class="btn secondary small" id="listBtn">
+     ☰ List
+    </button>
+   </div>
+   <div class="product-grid" id="productGrid">
+   </div>
+  </main>
+  <script src="products.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+    initShop('All');
+});
+</script>
+ 
+ </body>
+</html>

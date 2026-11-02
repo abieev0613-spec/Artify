@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Artify | Contact
+  </title>
+  <link href="style.css" rel="stylesheet"/>
+ 
+  <style>
+    /* Small page-specific polish; complex reusable layouts live in style.css. */
+    .page-heading p { margin-top: 6px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent, #a65a3d); outline-offset: 3px; }
+  </style>
+</head>
+ <body>
+  <main>
+   <div class="form-card">
+    <div class="eyebrow">
+     SAY HELLO
+    </div>
+    <h1>
+     Contact Artify
+    </h1>
+    <label>
+     Name
+    </label>
+    <input placeholder="Your name"/>
+    <label>
+     Email
+    </label>
+    <input placeholder="you@example.com" type="email"/>
+    <label>
+     Message
+    </label>
+    <textarea placeholder="How can we help?"></textarea>
+    <button class="btn" onclick="toast('Message submitted to Artify support')">
+     Send Message
+    </button>
+   </div>
+  </main>
+  <script src="products.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+ 
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      simplePage();
+    });
+  </script>
+ </body>
+</html>

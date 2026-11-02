@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Artify | Wishlist
+  </title>
+  <link href="style.css" rel="stylesheet"/>
+ 
+  <style>
+    /* Small page-specific polish; complex reusable layouts live in style.css. */
+    .page-heading p { margin-top: 6px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent, #a65a3d); outline-offset: 3px; }
+  </style>
+</head>
+ <body>
+  <main>
+   <div id="content">
+   </div>
+  </main>
+  <script src="products.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+ 
+
+  <script>
+    // Page-specific behavior for wishlist.html
+async function renderWishlist() {
+  base();
+  if (typeof loadUpdatedProducts === "function") await loadUpdatedProducts();
+  const target = $('#content');
+  if (!target) return;
+
+  const arr = wishlist.map(productById).filter(Boolean);
+
+  target.innerHTML = `<div class="page-heading">
+    <div>
+      <div class="eyebrow">SAVED FOR LATER</div>
+      <h1>My Wishlist</h1>
+      <p>${arr.length} saved handmade pieces</p>
+    </div>
+    <a class="btn secondary" href="products.html">Continue Shopping</a>
+  </div>
+  ${arr.length ? `<div class="product-grid">${arr.map(p => `
+    <article class="product-card">
+      <div class="visual ${p.palette}" onclick="openProduct(${p.id})">
+        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        <small>${p.category}</small>
+      </div>
+      <div class="product-info">
+        <div class="eyebrow">${p.category}</div>
+        <h3>${p.name}</h3>
+        <p>${p.description}</p>
+        <div class="rating">★ ${p.rating}</div>
+        <strong>${money(p.price)}</strong>
+        <div class="card-actions wishlist-actions">
+          <button class="btn small" onclick="addToCart(${p.id})">Add to Cart</button>
+          <button class="remove-btn" onclick="toggleWishlist(${p.id})">Remove</button>
+        </div>
+      </div>
+    </article>`).join('')}</div>` : `
+    <div class="empty-panel">
+      <span>♡</span>
+      <h2>Your wishlist is waiting</h2>
+      <p>Save pieces you love and find them here anytime.</p>
+      <a class="btn" href="products.html">Explore Products</a>
+    </div>`}`;
+}
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      renderWishlist();
+    });
+  </script>
+ </body>
+</html>

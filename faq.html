@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Artify | FAQ
+  </title>
+  <link href="style.css" rel="stylesheet"/>
+ 
+  <style>
+    /* Small page-specific polish; complex reusable layouts live in style.css. */
+    .page-heading p { margin-top: 6px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent, #a65a3d); outline-offset: 3px; }
+  </style>
+</head>
+ <body>
+  <main>
+   <div class="page-heading">
+    <div>
+     <div class="eyebrow">
+      NEED TO KNOW
+     </div>
+     <h1>
+      FAQ
+     </h1>
+     <p>
+      Quick answers about shopping on Artify.
+     </p>
+    </div>
+   </div>
+   <div class="faq-list">
+    <div class="faq-item">
+     <button class="faq-question">
+      How do I place an order?
+      <span>
+       ＋
+      </span>
+     </button>
+     <div class="faq-answer">
+      Choose a product, use View Product to inspect its views, add it to Cart, then complete Checkout.
+     </div>
+    </div>
+    <div class="faq-item">
+     <button class="faq-question">
+      Can I cancel an order?
+      <span>
+       ＋
+      </span>
+     </button>
+     <div class="faq-answer">
+      Open My Orders and use Cancel Order. The demo backend updates the order status to Cancelled.
+     </div>
+    </div>
+    <div class="faq-item">
+     <button class="faq-question">
+      Are payments real?
+      <span>
+       ＋
+      </span>
+     </button>
+     <div class="faq-answer">
+      No. COD, UPI, Net Banking and Card are simulated for the project demonstration. No real money is charged.
+     </div>
+    </div>
+    <div class="faq-item">
+     <button class="faq-question">
+      Can I edit my custom art request?
+      <span>
+       ＋
+      </span>
+     </button>
+     <div class="faq-answer">
+      Yes. Create a request from Custom Art. Saved requests can be edited or deleted from the same page.
+     </div>
+    </div>
+   </div>
+  </main>
+  <script src="products.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+ 
+
+  <script>
+    // Page-specific behavior for faq.html
+function faqPage(){base();$$('.faq-question').forEach(q=>q.addEventListener('click',()=>q.parentElement.classList.toggle('open')));}
+
+// Shared reusable functions are initialized by each page's inline script.
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      faqPage();
+    });
+  </script>
+ </body>
+</html>

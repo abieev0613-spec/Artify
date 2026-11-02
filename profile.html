@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Artify | My Studio</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .settings-theme {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .theme-choice {
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            padding: 14px 18px;
+            border-radius: 14px;
+            cursor: pointer;
+        }
+
+        .theme-choice.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--line);
+        }
+
+        .theme-choice span {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        .theme-choice small {
+            display: block;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .profile-welcome {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .profile-settings-note {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container page-pad">
+        <div id="content">
+            <div class="loading-card">
+                Opening your studio…
+            </div>
+        </div>
+    </main>
+
+    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        function escapeHTML(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[c]));
+        }
+
+        async function profilePage() {
+            base();
+
+            if (!currentUser) {
+                return go('login.html');
+            }
+
+            let user = currentUser;
+            let orders = [];
+
+            try {
+                const r = await fetch('/api/users/' + currentUser.id);
+
+                if (r.ok) {
+                    const payload = await r.json(); user = payload.user || payload;
+                }
+
+                const o = await fetch('/api/users/' + currentUser.id + '/orders');
+
+                if (o.ok) {
+                    const payload = await o.json();
+                    orders = payload.orders || [];
+                }
+            } catch {}
+
+            const cancelled = orders.filter(
+                o => o.status === 'Cancelled'
+            ).length;
+
+            $('#content').innerHTML = `
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">YOUR PERSONAL CORNER</div>
+
+                        <h1>My Studio ✦</h1>
+
+                        <p class="muted">
+                            Your details, saved treasures, and every order story
+                            in one place.
+                        </p>
+                    </div>
+                </div>
+
+                <section class="profile-card profile-welcome">
+                    <div class="profile-identity">
+                        <div class="avatar">
+                            ${(user.name || 'A').charAt(0).toUpperCase()}
+                        </div>
+
+                        <div>
+                            <div class="eyebrow">WELCOME BACK</div>
+
+                            <h2>
+                                ${escapeHTML(user.name || 'Artify friend')}
+                            </h2>
+
+                            <p>
+                                ${escapeHTML(user.email || user.phone || '')}
+                            </p>
+
+                            <small>
+                                Member since
+                                ${
+                                    (user.createdAt || user.created_at)
+                                        ? new Date(
+                                              user.createdAt || user.created_at
+                                          ).toLocaleDateString('en-IN')
+                                        : 'today'
+                                }
+                            </small>
+                        </div>
+                    </div>
+
+                    <button
+                        class="btn secondary"
+                        onclick="logout()"
+                    >
+                        Log out 
+                    </button>
+                </section>
+
+                <section class="stat-grid">
+                    <div>
+                        <b>${wishlist.length}</b>
+                        <span>Saved treasures</span>
+                    </div>
+
+                    <div>
+                        <b>
+                            ${cart.reduce(
+                                (n, id) => n + Number(cartQty[id] || 1),
+                                0
+                            )}
+                        </b>
+                        <span>Items in cart</span>
+                    </div>
+
+                    <div>
+                        <b>${orders.length}</b>
+                        <span>Total orders</span>
+                    </div>
+
+                    <div>
+                        <b>${cancelled}</b>
+                        <span>Cancelled orders</span>
+                    </div>
+                </section>
+
+                <div class="profile-sections">
+
+                    <section class="info-card">
+                        <div class="eyebrow">ACCOUNT DETAILS</div>
+
+                        <h2>Personal information</h2>
+
+                        <p>
+                            <strong>Name</strong>
+                            ${escapeHTML(user.name || 'Not added')}
+                        </p>
+
+                        <p>
+                            <strong>Email</strong>
+                            ${escapeHTML(user.email || 'Not added')}
+                        </p>
+
+                        <p>
+                            <strong>Mobile</strong>
+                            ${escapeHTML(user.phone || 'Not added')}
+                        </p>
+
+                        <p>
+                            <strong>Delivery address</strong>
+                            ${escapeHTML(user.address || 'Not added')}
+                        </p>
+
+                        <a href="orders.html">
+                            View order history 
+                        </a>
+                    </section>
+
+                    <section class="info-card">
+                        <div class="eyebrow">YOUR ACTIVITY</div>
+
+                        <h2>Keep creating moments</h2>
+
+                        <a href="wishlist.html">
+                            ♡ View wishlist
+                        </a>
+
+                        <a href="cart.html">
+                            🛍 View cart
+                        </a>
+
+                        <a href="orders.html">
+                            ▤ Orders &amp; cancellations
+                        </a>
+
+                        <a href="track-order.html">
+                            ⌁ Track an order
+                        </a>
+
+                        <a href="custom-art.html">
+                            ✎ Request custom art
+                        </a>
+                    </section>
+
+                </div>
+
+                <section class="info-card theme-settings">
+                    <div class="eyebrow">PERSONALISE YOUR STUDIO</div>
+
+                    <h2>Appearance settings</h2>
+
+                    <p class="profile-settings-note">
+                        Choose your preferred mood. Your choice is saved on
+                        this device and applied consistently to Artify pages,
+                        menus, cards, forms and popups.
+                    </p>
+
+                    <div class="settings-theme">
+
+                        <button
+                            class="theme-choice"
+                            data-theme-choice="light"
+                            onclick="setTheme('light')"
+                        >
+                            <span>☀️</span>
+                            <strong>Light studio</strong>
+                            <small>Warm paper, soft ink</small>
+                        </button>
+
+                        <button
+                            class="theme-choice"
+                            data-theme-choice="dark"
+                            onclick="setTheme('dark')"
+                        >
+                            <span>🌙</span>
+                            <strong>Dark studio</strong>
+                            <small>Deep plum, gentle glow</small>
+                        </button>
+
+                    </div>
+                </section>
+            `;
+
+            updateThemeChoices();
+        }
+
+        function updateThemeChoices() {
+            $$('[data-theme-choice]').forEach(el => {
+                el.classList.toggle(
+                    'active',
+                    el.dataset.themeChoice ===
+                        (localStorage.getItem('artify_theme') || 'light')
+                );
+            });
+        }
+
+        function logout() {
+            currentUser = null;
+
+            localStorage.removeItem('artify_user');
+
+            persist();
+
+            toast('You have logged out.');
+
+            setTimeout(() => go('home.html'), 450);
+        }
+
+        document.addEventListener('DOMContentLoaded', profilePage);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Artify | Checkout</title>
+
+    <link href="style.css" rel="stylesheet">
+
+    <style>
+        .page-heading p {
+            margin-top: 6px;
+        }
+
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible,
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid var(--accent, #a65a3d);
+            outline-offset: 3px;
+        }
+
+        .checkout-offer {
+            padding: 14px;
+            margin: 14px 0;
+            border: 1px dashed var(--accent, #a65a3d);
+            border-radius: 12px;
+        }
+
+        .checkout-offer p {
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .discount-line {
+            color: #218838;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            opacity: 0.65;
+            margin-right: 8px;
+        }
+
+        .discounted-price {
+            color: #218838;
+            font-weight: bold;
+        }
+
+        .summary-item,
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .summary-item span {
+            flex: 1;
+        }
+
+        .summary-item b {
+            text-align: right;
+        }
+
+        .checkout-layout {
+            align-items: start;
+        }
+
+        .form-card textarea,
+        .form-card input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+            margin: 8px 0 16px;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .payment-options .payment-option { border:1px solid var(--line); border-radius:10px; padding:10px 12px; min-width:130px; background:var(--surface); }
+        .checkout-coupon-row { display:flex; flex-direction:column; align-items:flex-start; gap:10px; margin-top:12px; }
+        .checkout-coupon-row input { width:100%; box-sizing:border-box; padding:13px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--text); }
+        .checkout-coupon-row button { min-width:110px; }
+        .checkout-coupon-box h3 { margin:0; }
+        .checkout-coupon-box p { line-height:1.65; }
+        .shipping-card { width:100%; max-width:640px; }
+        .checkout-layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:24px; }
+        @media (max-width:760px) { .checkout-layout { grid-template-columns:1fr; } .payment-options { display:flex; flex-direction:column; } .payment-options .payment-option { width:100%; } .checkout-coupon-row button { width:100%; } }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-note {
+            font-size: 13px;
+            margin-top: 12px;
+            opacity: 0.8;
+        }
+
+        .checkout-error { color:#c0392b; margin-top:10px; }
+        #paymentDetails select, #paymentDetails input { width:100%; box-sizing:border-box; padding:12px; margin:7px 0 14px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--text); }
+        .payment-success-overlay { position:fixed; inset:0; z-index:9999; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.62); }
+        .payment-success-card { width:min(420px,100%); padding:32px 24px; text-align:center; border-radius:22px; background:var(--surface); color:var(--text); box-shadow:0 20px 80px #0005; animation:successPop .25s ease-out; }
+        .payment-success-check { width:76px; height:76px; display:grid; place-items:center; margin:0 auto 16px; border-radius:50%; background:#1b9b61; color:white; font-size:44px; font-weight:bold; }
+        .payment-success-card h2 { margin-bottom:8px; } .payment-success-card p { margin:7px 0; } .payment-success-card small { color:var(--muted); }
+        @keyframes successPop { from { opacity:0; transform:scale(.9); } to { opacity:1; transform:scale(1); } }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <div id="checkoutBox"></div>
+    </main>
+
+    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        /*
+         * ARTIFY CHECKOUT
+         * Category discount + common coupon + final total.
+         */
+
+        const checkoutCategoryDiscounts = {
+            "Paintings": 15,
+            "Crafts": 10,
+            "Crochet": 12,
+            "Home Decor": 15,
+            "Jewellery": 10,
+            "Bouquets": 12
+        };
+
+        let checkoutCoupon = "";
+        let checkoutCouponFeedback = { message: "", type: "" };
+
+        /*
+         * Calculate a product's category discount.
+         */
+        function checkoutProductDiscount(product) {
+            const percentage =
+                checkoutCategoryDiscounts[product.category] || 0;
+
+            return Math.round(product.price * percentage / 100);
+        }
+
+        /*
+         * Calculate all cart totals.
+         *
+         * ARTIFY100:
+         * ₹100 off if the original subtotal is at least ₹999.
+         */
+        function calculateCheckoutTotals() {
+            const items = cart.map(productById).filter(Boolean);
+
+            let subtotal = 0;
+            let categoryDiscount = 0;
+            let itemCount = 0;
+
+            items.forEach(product => {
+                const quantity = Math.max(
+                    1,
+                    Number(cartQty[product.id] || 1)
+                );
+
+                subtotal += product.price * quantity;
+
+                categoryDiscount +=
+                    checkoutProductDiscount(product) * quantity;
+
+                itemCount += quantity;
+            });
+
+            const afterCategoryDiscount = Math.max(
+                0,
+                subtotal - categoryDiscount
+            );
+
+            let couponDiscount = 0;
+
+            if (
+                checkoutCoupon === "ARTIFY100" &&
+                subtotal >= 999
+            ) {
+                couponDiscount = 100;
+            }
+
+            // The total must never be negative.
+            couponDiscount = Math.min(
+                couponDiscount,
+                afterCategoryDiscount
+            );
+
+            const grandTotal = Math.max(
+                0,
+                afterCategoryDiscount - couponDiscount
+            );
+
+            return {
+                items,
+                subtotal,
+                categoryDiscount,
+                couponDiscount,
+                grandTotal,
+                itemCount
+            };
+        }
+
+        /*
+         * Render the checkout page.
+         */
+        async function checkoutPage() {
+            base();
+            if (typeof loadUpdatedProducts === "function") await loadUpdatedProducts();
+
+            const target = $("#checkoutBox");
+
+            if (!target) return;
+
+            // User must log in before checking out.
+            if (!currentUser) {
+                return go("login.html");
+            }
+
+            // Read the coupon applied on the cart page.
+            try {
+                checkoutCoupon =
+                    localStorage.getItem("artifyAppliedCoupon") || "";
+            } catch (error) {
+                checkoutCoupon = "";
+            }
+
+            const totals = calculateCheckoutTotals();
+
+            const {
+                items,
+                subtotal,
+                categoryDiscount,
+                couponDiscount,
+                grandTotal,
+                itemCount
+            } = totals;
+
+            if (!items.length) {
+                target.innerHTML = `
+                    <div class="empty-panel">
+                        <span>🛒</span>
+                        <h2>Your cart is empty</h2>
+                        <p>Add handmade products before checkout.</p>
+                        <a class="btn" href="products.html">
+                            Shop Products
+                        </a>
+                    </div>
+                `;
+
+                return;
+            }
+
+            const couponIsValid =
+                checkoutCoupon === "ARTIFY100" && subtotal >= 999;
+
+            target.innerHTML = `
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">SECURE DEMO CHECKOUT</div>
+                        <h1>Complete Your Order</h1>
+                        <p>
+                            Review your items and delivery details.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="checkout-layout">
+
+                    <section class="form-card shipping-card">
+
+                        <div class="eyebrow">DELIVERY DETAILS</div>
+
+                        <h1>Shipping Information</h1>
+
+                        <label for="checkoutAddress">
+                            Delivery Address
+                        </label>
+
+                        <textarea id="checkoutAddress" rows="4" placeholder="Enter your complete delivery address" required>${escapeCheckoutText(currentUser.address || "")}</textarea>
+                        <small class="muted">This is your saved address. You can edit it for this order; the updated address will be saved to your account.</small>
+
+                        <label for="checkoutPhone">Contact number</label>
+                        <input type="tel" id="checkoutPhone" inputmode="numeric" pattern="[0-9]{10,15}" value="${escapeCheckoutText(currentUser.phone || "")}" placeholder="Enter delivery contact number" required>
+
+                        <div class="eyebrow">PAYMENT</div>
+
+                        <h2>Payment Method</h2>
+
+                        <div class="payment-options payment-options-horizontal">
+                            ${["UPI", "Net Banking", "Card", "Cash on Delivery"].map((method, index) => `
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="${method}" ${index === 0 ? "checked" : ""}>
+                                    <span>${method}</span>
+                                </label>
+                            `).join("")}
+                        </div>
+
+                        <div id="paymentDetails"></div>
+
+                        <div class="checkout-offer checkout-coupon-box">
+                            <h3>🎁 Have a coupon?</h3>
+                            <p>Use <strong>ARTIFY100</strong> for ₹100 off when your original cart subtotal is ₹999 or more.</p>
+                            <div class="checkout-coupon-row">
+                                <input type="text" id="checkoutCouponInput" placeholder="Enter coupon code" value="${escapeCheckoutText(checkoutCoupon)}" autocomplete="off">
+                                <button class="btn" type="button" id="applyCheckoutCoupon">Apply</button>
+                            </div>
+                            <p id="checkoutCouponMessage" class="checkout-error" aria-live="polite"></p>
+                        </div>
+
+                        <button
+                            class="btn full"
+                            id="placeOrder"
+                            type="button"
+                        >
+                            Place Order — ${money(grandTotal)}
+                        </button>
+
+                        <p class="demo-note">
+                            Demo payment only. Do not enter real card
+                            numbers, passwords, PINs or banking details.
+                        </p>
+
+                        <p
+                            id="checkoutError"
+                            class="checkout-error"
+                            aria-live="polite"
+                        ></p>
+
+                    </section>
+
+                    <aside class="summary">
+
+                        <h2>Order Summary</h2>
+
+                        <p>
+                            ${itemCount}
+                            item${itemCount === 1 ? "" : "s"}
+                        </p>
+
+                        ${items.map(product => {
+                            const quantity = Math.max(
+                                1,
+                                Number(cartQty[product.id] || 1)
+                            );
+
+                            const originalLineTotal =
+                                product.price * quantity;
+
+                            const discountPerItem =
+                                checkoutProductDiscount(product);
+
+                            const discountedLineTotal =
+                                (product.price - discountPerItem) * quantity;
+
+                            return `
+                                <div class="summary-item">
+                                    <span>
+                                        ${product.name}
+                                        × ${quantity}
+
+                                        ${
+                                            discountPerItem > 0
+                                            ? `
+                                                <br>
+                                                <small class="discount-line">
+                                                    ${checkoutCategoryDiscounts[product.category]}%
+                                                    category offer
+                                                </small>
+                                            `
+                                            : ""
+                                        }
+                                    </span>
+
+                                    <b>
+                                        ${
+                                            discountPerItem > 0
+                                            ? `
+                                                <span class="original-price">
+                                                    ${money(originalLineTotal)}
+                                                </span>
+                                                <br>
+                                                <span class="discounted-price">
+                                                    ${money(discountedLineTotal)}
+                                                </span>
+                                            `
+                                            : money(originalLineTotal)
+                                        }
+                                    </b>
+                                </div>
+                            `;
+                        }).join("")}
+
+                        <hr>
+
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <b>${money(subtotal)}</b>
+                        </div>
+
+                        <div class="summary-row discount-line">
+                            <span>Category discounts</span>
+                            <b>− ${money(categoryDiscount)}</b>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Delivery</span>
+                            <b>FREE</b>
+                        </div>
+
+                        ${
+                            couponDiscount > 0
+                            ? `
+                                <div class="summary-row discount-line">
+                                    <span>Coupon discount</span>
+                                    <b>− ${money(couponDiscount)}</b>
+                                </div>
+                            `
+                            : ""
+                        }
+
+                        <hr>
+
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <b>${money(grandTotal)}</b>
+                        </div>
+
+                    </aside>
+
+                </div>
+            `;
+
+            /*
+             * Payment method behavior.
+             * These are demo fields only, not real payment processing.
+             */
+            const drawPayment = () => {
+                const selected = $('input[name="payment"]:checked');
+                const paymentDetails = $("#paymentDetails");
+                if (!selected || !paymentDetails) return;
+                const method = selected.value;
+                if (method === "Cash on Delivery") {
+                    paymentDetails.innerHTML = `<div class="demo-note">Pay when your handmade parcel arrives.</div>`;
+                } else if (method === "UPI") {
+                    paymentDetails.innerHTML = `
+                        <label for="paymentProvider">Choose UPI app</label>
+                        <select id="paymentProvider" required><option value="">Select UPI app</option><option>Google Pay</option><option>PhonePe</option><option>Paytm</option><option>BHIM UPI</option><option>Other UPI app</option></select>
+                        <label for="paymentRef">Demo UPI ID / reference</label>
+                        <input type="text" id="paymentRef" placeholder="example@upi" autocomplete="off">
+                        <p class="demo-note">Simulation only: no real UPI payment is sent.</p>`;
+                } else if (method === "Net Banking") {
+                    paymentDetails.innerHTML = `
+                        <label for="paymentProvider">Choose your bank</label>
+                        <select id="paymentProvider" required><option value="">Select bank</option><option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option><option>Kotak Mahindra Bank</option><option>Punjab National Bank</option><option>Bank of Baroda</option><option>Canara Bank</option><option>Indian Bank</option><option>Other bank</option></select>
+                        <label for="paymentRef">Demo transaction reference</label>
+                        <input type="text" id="paymentRef" placeholder="DEMO-NETBANKING" autocomplete="off">
+                        <p class="demo-note">Simulation only: no bank login or transfer occurs.</p>`;
+                } else {
+                    paymentDetails.innerHTML = `
+                        <label for="paymentProvider">Card type</label>
+                        <select id="paymentProvider" required><option value="">Select card type</option><option>Visa</option><option>Mastercard</option><option>RuPay</option><option>American Express</option></select>
+                        <label for="paymentRef">Demo card reference (do not enter real card details)</label>
+                        <input type="text" id="paymentRef" placeholder="DEMO-CARD-1234" autocomplete="off">
+                        <p class="demo-note">Simulation only: never enter a real card number, CVV, PIN or OTP.</p>`;
+                }
+            };
+
+            $$('input[name="payment"]').forEach(radio => {
+                radio.addEventListener("change", drawPayment);
+            });
+
+            drawPayment();
+            if (checkoutCouponFeedback.message) {
+                const couponMessage = $("#checkoutCouponMessage");
+                couponMessage.textContent = checkoutCouponFeedback.message;
+                couponMessage.style.color = checkoutCouponFeedback.type === "success" ? "#218838" : "#c0392b";
+            } else if (checkoutCoupon === "ARTIFY100" && calculateCheckoutTotals().couponDiscount > 0) {
+                const couponMessage = $("#checkoutCouponMessage");
+                couponMessage.textContent = "Coupon applied! ₹100 discount added.";
+                couponMessage.style.color = "#218838";
+            }
+
+            $("#applyCheckoutCoupon").addEventListener("click", () => {
+                const input = $("#checkoutCouponInput");
+                const code = input.value.trim().toUpperCase();
+                const saved = {
+                    address: $("#checkoutAddress").value,
+                    phone: $("#checkoutPhone").value,
+                    method: $('input[name="payment"]:checked')?.value || "UPI",
+                    provider: $("#paymentProvider")?.value || "",
+                    reference: $("#paymentRef")?.value || ""
+                };
+                const refreshKeepingFields = () => checkoutPage().then(() => {
+                    $("#checkoutAddress").value = saved.address;
+                    $("#checkoutPhone").value = saved.phone;
+                    const radio = $(`input[name="payment"][value="${saved.method}"]`);
+                    if (radio) { radio.checked = true; radio.dispatchEvent(new Event("change")); }
+                    if ($("#paymentProvider")) $("#paymentProvider").value = saved.provider;
+                    if ($("#paymentRef")) $("#paymentRef").value = saved.reference;
+                });
+
+                if (!code) {
+                    checkoutCoupon = "";
+                    localStorage.removeItem("artifyAppliedCoupon");
+                    checkoutCouponFeedback = {message:"Please enter a coupon code.",type:"error"};
+                    refreshKeepingFields();
+                    return;
+                }
+                if (code !== "ARTIFY100") {
+                    checkoutCoupon = "";
+                    localStorage.removeItem("artifyAppliedCoupon");
+                    checkoutCouponFeedback = {message:"Invalid coupon code. Please try ARTIFY100.",type:"error"};
+                    refreshKeepingFields();
+                    return;
+                }
+                if (calculateCheckoutTotals().subtotal < 999) {
+                    checkoutCoupon = "";
+                    localStorage.removeItem("artifyAppliedCoupon");
+                    checkoutCouponFeedback = {message:"Add items worth ₹999 or more to use ARTIFY100.",type:"error"};
+                    refreshKeepingFields();
+                    return;
+                }
+                checkoutCoupon = code;
+                localStorage.setItem("artifyAppliedCoupon", code);
+                checkoutCouponFeedback = {message:"Coupon applied! ₹100 discount added.",type:"success"};
+                refreshKeepingFields();
+            });
+
+            $("#placeOrder").addEventListener("click", placeArtifyOrder);
+        }
+
+        /*
+         * Escape a saved address before inserting it into HTML.
+         */
+        function escapeCheckoutText(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        /*
+         * Place the order with the calculated discounted total.
+         */
+        async function placeArtifyOrder() {
+            const button = $("#placeOrder");
+            const errorBox = $("#checkoutError");
+
+            if (!button) return;
+
+            const address = $("#checkoutAddress").value.trim();
+            const phone = $("#checkoutPhone").value.trim().replace(/\D/g, "");
+
+            const selectedPayment =
+                $('input[name="payment"]:checked');
+
+            if (!address) return showCheckoutError("Please enter your delivery address.");
+            if (!/^\d{10,15}$/.test(phone)) return showCheckoutError("Enter a valid 10–15 digit contact number.");
+
+            if (!selectedPayment) {
+                return showCheckoutError(
+                    "Please select a payment method."
+                );
+            }
+
+            const method = selectedPayment.value;
+
+            const paymentRef =
+                $("#paymentRef")?.value.trim() || "";
+
+            const paymentProvider = $("#paymentProvider")?.value || "";
+            if (method !== "Cash on Delivery" && (!paymentProvider || !paymentRef)) {
+                return showCheckoutError("Select a payment provider and enter a fictional demo reference.");
+            }
+
+            if (!cart.length) {
+                return showCheckoutError(
+                    "Your cart is empty."
+                );
+            }
+
+            // Recalculate totals immediately before sending the order.
+            const totals = calculateCheckoutTotals();
+
+            if (!totals.items.length) {
+                return showCheckoutError(
+                    "No valid products were found in your cart."
+                );
+            }
+
+            button.disabled = true;
+            button.textContent = "Processing Order...";
+
+            if (errorBox) errorBox.textContent = "";
+
+            try {
+                const orderPayload = {
+                    userId: Number(currentUser.id),
+                    phone,
+                    paymentMethod: method,
+                    paymentProvider,
+
+                    items: totals.items.map(product => {
+                        const quantity = Math.max(
+                            1,
+                            Number(cartQty[product.id] || 1)
+                        );
+
+                        const discount =
+                            checkoutProductDiscount(product);
+
+                        return {
+                            ...product,
+                            quantity,
+                            original_price: product.price,
+                            discount_per_item: discount,
+                            final_price: product.price - discount,
+                            line_total:
+                                (product.price - discount) * quantity
+                        };
+                    }),
+
+                    subtotal: totals.subtotal,
+
+                    category_discount: totals.categoryDiscount,
+
+                    coupon_code:
+                        totals.couponDiscount > 0
+                        ? checkoutCoupon
+                        : "",
+
+                    coupon_discount: totals.couponDiscount,
+
+                    delivery_charge: 0,
+
+                    total: totals.grandTotal,
+
+                    payment_reference: method === "Cash on Delivery" ? "COD" : paymentRef,
+                    address
+                };
+
+                const response = await fetch("/api/orders", {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(orderPayload)
+                });
+
+                let output = {};
+
+                try {
+                    output = await response.json();
+                } catch (error) {
+                    output = {};
+                }
+
+                if (!response.ok) {
+                    throw new Error(
+                        output.error ||
+                        "Unable to place the order."
+                    );
+                }
+
+                /*
+                 * Only clear the cart after the backend confirms success.
+                 */
+                cart = [];
+                cartQty = {};
+
+                currentUser.address = address;
+                currentUser.phone = phone;
+                persist();
+                // Persist the latest contact/address to the user record as well.
+                try {
+                    await fetch(`/api/users/${currentUser.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ address, phone })
+                    });
+                } catch (profileSaveError) {
+                    console.warn("Could not update saved profile delivery details", profileSaveError);
+                }
+
+                if (method !== "Cash on Delivery") {
+                    showPaymentSuccess(method, paymentProvider, output.order?.id, totals.grandTotal);
+                    await new Promise(resolve => setTimeout(resolve, 1800));
+                }
+
+                try {
+                    localStorage.removeItem("artifyAppliedCoupon");
+                } catch (error) {
+                    // Ignore storage errors.
+                }
+
+                appliedCoupon = "";
+                persist();
+
+                toast("Order confirmed successfully!");
+
+                setTimeout(() => {
+                    go("orders.html");
+                }, 700);
+
+            } catch (error) {
+                showCheckoutError(
+                    error.message ||
+                    "Unable to connect to the backend."
+                );
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Place Order — " +
+                    money(calculateCheckoutTotals().grandTotal);
+            }
+        }
+
+        function showPaymentSuccess(method, provider, orderId, amount) {
+            const overlay = document.createElement("div");
+            overlay.className = "payment-success-overlay";
+            overlay.innerHTML = `<div class="payment-success-card" role="status" aria-live="polite"><div class="payment-success-check">✓</div><h2>Payment successful</h2><p>₹${Number(amount || 0).toLocaleString("en-IN")} paid successfully</p><p>${escapeCheckoutText(provider || method)} · Order #${escapeCheckoutText(orderId || "")}</p><small>Artify demo payment confirmation</small></div>`;
+            document.body.appendChild(overlay);
+        }
+
+        function showCheckoutError(message) {
+            const errorBox = $("#checkoutError");
+
+            if (errorBox) {
+                errorBox.textContent = message;
+            } else if (typeof toast === "function") {
+                toast(message);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            checkoutPage();
+        });
+    </script>
+
+</body>
+</html>

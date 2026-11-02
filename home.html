@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Artify — A Little Universe of Handmade Things</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+    /* =====================================
+       HOME PAGE BASE
+    ===================================== */
+
+    .home-editorial {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .home-main {
+        padding-top: 20px;
+    }
+
+    /* =====================================
+       ARTIFY ADVERTISEMENT BANNER
+    ===================================== */
+
+    .artify-ad {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        align-items: center;
+        gap: 25px;
+
+        width: 100%;
+        margin: 10px 0 25px;
+        padding: clamp(25px, 4vw, 48px);
+
+        border: 1px solid var(--line);
+        border-radius: 24px;
+
+        background:
+            radial-gradient(
+                circle at 90% 10%,
+                rgba(190, 143, 112, 0.22),
+                transparent 40%
+            ),
+            var(--surface);
+
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .artify-ad-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .artify-ad-label {
+        display: inline-block;
+        padding: 7px 12px;
+        margin-bottom: 16px;
+
+        border: 1px solid var(--line);
+        border-radius: 30px;
+
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.13em;
+        color: var(--accent);
+    }
+
+    .artify-ad h2 {
+        margin: 0 0 14px;
+
+        font-size: clamp(2rem, 4.5vw, 4rem);
+        line-height: 1.05;
+        letter-spacing: -0.045em;
+    }
+
+    .artify-ad h2 em {
+        font-family: Georgia, serif;
+        font-weight: 400;
+        color: var(--accent);
+    }
+
+    .artify-ad p {
+        max-width: 520px;
+        margin: 0 0 22px;
+
+        color: var(--muted);
+        line-height: 1.8;
+    }
+
+    .artify-ad .ad-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+
+        padding: 13px 22px;
+
+        border: 1px solid var(--accent);
+        border-radius: 30px;
+
+        background: var(--accent);
+        color: white;
+
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none;
+
+        transition:
+            transform 0.25s ease,
+            opacity 0.25s ease;
+    }
+
+    .artify-ad .ad-button:hover {
+        transform: translateY(-3px);
+        opacity: 0.9;
+    }
+
+    .artify-ad .ad-button:focus-visible {
+        outline: 3px solid var(--accent2);
+        outline-offset: 4px;
+    }
+
+    .artify-ad-art {
+        position: relative;
+
+        display: grid;
+        place-items: center;
+
+        min-height: 210px;
+    }
+
+    .ad-art-circle {
+        display: grid;
+        place-items: center;
+
+        width: clamp(150px, 20vw, 240px);
+        aspect-ratio: 1;
+
+        border: 1px solid var(--line);
+        border-radius: 50%;
+
+        background: rgba(190, 143, 112, 0.12);
+
+        font-size: clamp(4rem, 9vw, 7rem);
+
+        animation: adFloat 4s ease-in-out infinite;
+    }
+
+    .ad-art-sparkle {
+        position: absolute;
+
+        color: var(--accent);
+        font-size: 1.8rem;
+    }
+
+    .ad-art-sparkle.one {
+        top: 10%;
+        left: 12%;
+    }
+
+    .ad-art-sparkle.two {
+        top: 22%;
+        right: 8%;
+    }
+
+    .ad-art-sparkle.three {
+        bottom: 8%;
+        left: 25%;
+    }
+
+    @keyframes adFloat {
+        0%,
+        100% {
+            transform: translateY(0) rotate(-3deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(3deg);
+        }
+    }
+
+    /* =====================================
+       HERO SECTION
+    ===================================== */
+
+    .home-hero {
+        min-height: 88vh;
+
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+
+        align-items: center;
+        gap: 4vw;
+
+        padding: clamp(28px, 6vw, 90px) 0;
+    }
+
+    .home-kicker {
+        letter-spacing: 0.2em;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--accent);
+    }
+
+    .home-hero h1 {
+        font-size: clamp(3rem, 7.5vw, 7.2rem);
+        line-height: 0.92;
+        letter-spacing: -0.065em;
+        margin: 22px 0;
+    }
+
+    .home-hero h1 em {
+        font-family: Georgia, serif;
+        font-weight: 400;
+        color: var(--accent);
+    }
+
+    .home-hero p {
+        max-width: 590px;
+        font-size: 1.12rem;
+        line-height: 1.9;
+        color: var(--muted);
+    }
+
+    .home-hero .quote {
+        margin: 22px 0;
+        line-height: 1.7;
+        color: var(--accent);
+        font-family: Georgia, serif;
+        font-size: 1.15rem;
+    }
+
+    .home-hero-art {
+        position: relative;
+
+        min-height: 520px;
+
+        display: grid;
+        place-items: center;
+    }
+
+    .orbit {
+        position: absolute;
+
+        border: 1px solid var(--line);
+        border-radius: 50%;
+
+        width: min(92%, 520px);
+        aspect-ratio: 1;
+
+        animation: slowspin 48s linear infinite;
+    }
+
+    .orbit::before,
+    .orbit::after {
+        content: "✦";
+
+        position: absolute;
+
+        color: var(--accent);
+        font-size: 2rem;
+    }
+
+    .orbit::before {
+        top: 12%;
+        left: 18%;
+    }
+
+    .orbit::after {
+        bottom: 12%;
+        right: 15%;
+    }
+
+    .hero-collage {
+        position: relative;
+
+        width: min(90%, 470px);
+        height: 500px;
+    }
+
+    .collage-tile {
+        position: absolute;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid var(--line);
+        box-shadow: 0 22px 65px #39251617;
+
+        border-radius: 48% 48% 18px 18px;
+
+        font-size: clamp(3rem, 6vw, 6rem);
+        overflow: hidden;
+    }
+
+    .collage-tile img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+        display: block;
+    }
+
+    .collage-tile.one {
+        width: 54%;
+        height: 63%;
+
+        left: 3%;
+        top: 6%;
+
+        background: #e7b9a0;
+        transform: rotate(-8deg);
+    }
+
+    .collage-tile.two {
+        width: 52%;
+        height: 55%;
+
+        right: 2%;
+        top: 0;
+
+        background: #d6dfc5;
+        transform: rotate(8deg);
+
+        border-radius: 18px 18px 48% 48%;
+    }
+
+    .collage-tile.three {
+        width: 55%;
+        height: 48%;
+
+        left: 22%;
+        bottom: 0;
+
+        background: #f1d991;
+        transform: rotate(3deg);
+    }
+
+    .floating-note {
+        position: absolute;
+
+        background: var(--surface);
+
+        padding: 14px 18px;
+        border-radius: 14px;
+
+        box-shadow: var(--shadow);
+
+        font-size: 0.88rem;
+
+        transform: rotate(-5deg);
+
+        left: 0;
+        bottom: 22%;
+    }
+
+    /* =====================================
+       GENERAL HOME SECTIONS
+    ===================================== */
+
+    .home-section {
+        padding: clamp(58px, 8vw, 110px) 0;
+        border-top: 1px solid var(--line);
+    }
+
+    .home-section h2 {
+        font-size: clamp(2rem, 4vw, 4rem);
+        letter-spacing: -0.045em;
+        line-height: 1.06;
+        margin: 12px 0 20px;
+    }
+
+    .home-section p {
+        line-height: 1.9;
+        color: var(--muted);
+        max-width: 800px;
+    }
+
+    .home-section p + p {
+        margin-top: 16px;
+    }
+
+    .manifesto {
+        display: grid;
+        grid-template-columns: 0.7fr 1.3fr;
+
+        gap: 6vw;
+        align-items: start;
+    }
+
+    .manifesto-stamp {
+        font-size: clamp(4rem, 12vw, 10rem);
+        color: var(--accent);
+        line-height: 1;
+    }
+
+    /* =====================================
+       CATEGORY TILES
+    ===================================== */
+
+    .craft-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 14px;
+        margin-top: 32px;
+    }
+
+    .craft-tile {
+        min-height: 210px;
+
+        border-radius: 18px;
+        padding: 24px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 14px;
+
+        border: 1px solid var(--line);
+        background: var(--surface);
+
+        transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    .craft-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow);
+    }
+
+    .craft-tile .emoji {
+        font-size: 3rem;
+    }
+
+    .craft-tile small {
+        color: var(--muted);
+        line-height: 1.6;
+    }
+
+    /* =====================================
+       CUSTOMER JOURNEY
+    ===================================== */
+
+    .journey-flow {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 10px;
+        margin: 36px 0;
+    }
+
+    .journey-step {
+        padding: 24px 15px;
+        text-align: center;
+
+        border: 1px dashed var(--accent);
+        border-radius: 18px;
+
+        position: relative;
+
+        background: var(--surface);
+    }
+
+    .journey-step .step-icon {
+        font-size: 2.3rem;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .journey-step p {
+        margin: 12px auto 0;
+        font-size: 0.95rem;
+    }
+
+    .journey-step:not(:last-child)::after {
+        content: "→";
+
+        position: absolute;
+
+        right: -18px;
+        top: 40%;
+
+        z-index: 2;
+
+        background: var(--bg);
+        padding: 3px;
+
+        font-size: 1.3rem;
+        color: var(--accent);
+    }
+
+    /* =====================================
+       QUOTE WALL
+    ===================================== */
+
+    .quote-wall {
+        padding: clamp(30px, 6vw, 70px);
+
+        border-radius: 28px;
+        background: var(--accent);
+        color: white;
+
+        margin: 50px 0;
+    }
+
+    .quote-wall blockquote {
+        font: clamp(1.7rem, 4vw, 3.8rem) / 1.15 Georgia, serif;
+        max-width: 900px;
+
+        margin: 20px 0;
+    }
+
+    .quote-wall p {
+        color: #ffffffcf;
+        line-height: 1.8;
+    }
+
+    /* =====================================
+       FINAL SECTION
+    ===================================== */
+
+    .home-ending {
+        text-align: center;
+        padding: 90px 0 110px;
+    }
+
+    .home-ending .final-mark {
+        font-size: 3.5rem;
+    }
+
+    .home-ending h2 {
+        font-size: clamp(2.2rem, 5vw, 4.5rem);
+        letter-spacing: -0.045em;
+        margin-top: 18px;
+    }
+
+    .home-ending p {
+        max-width: 680px;
+        margin: 18px auto 28px;
+
+        line-height: 1.9;
+        color: var(--muted);
+    }
+
+    /* =====================================
+       ANIMATIONS
+    ===================================== */
+
+    @keyframes slowspin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* =====================================
+       TABLET RESPONSIVE
+    ===================================== */
+
+    @media (max-width: 1000px) {
+        .craft-strip {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .home-hero {
+            gap: 25px;
+        }
+
+        .home-hero-art {
+            min-height: 450px;
+        }
+
+        .hero-collage {
+            height: 420px;
+        }
+    }
+
+    /* =====================================
+       MOBILE RESPONSIVE
+    ===================================== */
+
+    @media (max-width: 760px) {
+        .home-main {
+            padding-top: 12px;
+        }
+
+        .artify-ad {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 25px 20px;
+        }
+
+        .artify-ad h2 {
+            font-size: clamp(2rem, 8vw, 3rem);
+        }
+
+        .artify-ad p {
+            font-size: 0.95rem;
+        }
+
+        .artify-ad-art {
+            min-height: 160px;
+        }
+
+        .ad-art-circle {
+            width: 155px;
+        }
+
+        .home-hero {
+            min-height: auto;
+
+            grid-template-columns: 1fr;
+
+            padding-top: 45px;
+            padding-bottom: 55px;
+        }
+
+        .home-hero h1 {
+            font-size: clamp(3rem, 13vw, 5rem);
+        }
+
+        .home-hero p {
+            font-size: 1rem;
+        }
+
+        .home-hero-art {
+            min-height: 400px;
+        }
+
+        .hero-collage {
+            height: 400px;
+        }
+
+        .manifesto {
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        .craft-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .craft-tile {
+            padding: 18px;
+            min-height: 190px;
+        }
+
+        .journey-flow {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .journey-step:nth-child(2)::after {
+            display: none;
+        }
+
+        .home-photo-row {
+            grid-template-columns: 1fr;
+        }
+
+        .home-photo {
+            min-height: 170px;
+        }
+
+        .quote-wall {
+            margin: 30px 0;
+        }
+
+        .home-ending {
+            padding: 65px 0 75px;
+        }
+    }
+
+    /* =====================================
+       SMALL MOBILE
+    ===================================== */
+
+    @media (max-width: 420px) {
+        .craft-strip,
+        .journey-flow {
+            grid-template-columns: 1fr;
+        }
+
+        .journey-step::after {
+            display: none;
+        }
+
+        .home-hero-art {
+            min-height: 320px;
+        }
+
+        .hero-collage {
+            height: 320px;
+        }
+
+        .floating-note {
+            font-size: 0.75rem;
+            padding: 10px 12px;
+        }
+
+        .artify-ad-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+        }
+    }
+
+    /* =====================================
+       ACCESSIBILITY
+    ===================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+        .orbit,
+        .ad-art-circle {
+            animation: none;
+        }
+
+        .craft-tile,
+        .artify-ad .ad-button {
+            transition: none;
+        }
+    }
+</style>
+
+</head>
+
+<body class="home-editorial">
+
+<main class="container home-main">
+
+    <!-- =====================================
+         ARTIFY ADVERTISEMENT BANNER
+    ===================================== -->
+
+    <section class="artify-ad" aria-label="Artify special offers">
+
+        <div class="artify-ad-content">
+
+            <span class="artify-ad-label">
+                ✦ THE ARTIFY ✦
+            </span>
+
+            <h2>
+                Little treasures.<br>
+                <em>Lovely surprises.</em>
+            </h2>
+
+            <p>
+                Discover paintings, handmade jewellery, crochet,
+                thoughtful gifts and home décor created to bring
+                a little more colour and creativity into everyday life.
+            </p>
+
+            <a href="offers.html" class="ad-button">
+                Explore Offers <span aria-hidden="true"></span>
+            </a>
+
+        </div>
+
+        <div class="artify-ad-art" aria-hidden="true">
+
+            <span class="ad-art-sparkle one">✦</span>
+            <span class="ad-art-sparkle two">✧</span>
+            <span class="ad-art-sparkle three">♡</span>
+
+            <div class="ad-art-circle">
+                🎁
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================
+         HERO SECTION
+    ===================================== -->
+
+    <section class="home-hero">
+
+        <div>
+
+            <div class="home-kicker">
+                A HANDMADE UNIVERSE · EST. WITH LOVE
+            </div>
+
+            <h1>
+                Things made<br>
+                slowly.<br>
+                <em>Kept forever.</em>
+            </h1>
+
+            <p>
+                Welcome to Artify — a colourful little corner for
+                objects with a heartbeat. Meet paintings with a
+                point of view, crochet made stitch by stitch,
+                jewellery with a story, thoughtful home accents,
+                paper crafts and bouquets that never hurry to fade.
+            </p>
+
+            <p>
+                We believe a home is built from details, gifts are
+                remembered for the feeling they carry, and handmade
+                things bring a gentle kind of magic into ordinary days.
+            </p>
+
+            <div class="quote">
+                “A little handmade magic for every corner of your life.”
+            </div>
+
+            <a class="btn home-explore" href="products.html">
+                Explore Products <span></span>
+            </a>
+
+        </div>
+
+        <!-- Decorative Handmade Art Collage -->
+
+        <div
+            class="home-hero-art"
+            aria-label="Decorative handmade art collage"
+        >
+
+            <div class="orbit"></div>
+
+            <div class="hero-collage">
+
+                <div class="collage-tile one">
+                    <img
+                        src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=85"
+                        alt="Artist palette and painting supplies"
+                    >
+                </div>
+
+                <div class="collage-tile two">
+                    <img
+                        src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=900&q=85"
+                        alt="Soft coloured flowers"
+                    >
+                </div>
+
+                <div class="collage-tile three">
+                    <img
+                        src="https://images.unsplash.com/photo-1604881988758-f76ad2f7adec?auto=format&fit=crop&w=900&q=85"
+                        alt="Yarn and handmade textile materials"
+                    >
+                </div>
+
+                <div class="floating-note">
+                    ✦ Made by hand, chosen by heart
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================
+         OUR PHILOSOPHY
+    ===================================== -->
+
+    <section class="home-section manifesto">
+
+        <div>
+
+            <div class="home-kicker">
+                OUR LITTLE PHILOSOPHY
+            </div>
+
+            <div class="manifesto-stamp">✿</div>
+
+            <h2>
+                Not factory-perfect.<br>
+                Beautifully human.
+            </h2>
+
+        </div>
+
+        <div>
+
+            <p>
+                Every handmade piece holds traces of the person
+                who made it: the time they took, the colours they
+                chose, the tiny decisions that make one object
+                different from another. That is the charm we
+                celebrate at Artify.
+            </p>
+
+            <p>
+                Some pieces bring colour to a quiet wall. Some
+                become a birthday surprise, a thank-you, a
+                housewarming gift or a small reminder that
+                somebody thought of you. Others simply make
+                your desk, shelf or favourite corner feel a
+                little more like yours.
+            </p>
+
+            <p>
+                Our collection is designed for curious collectors,
+                thoughtful gifters, cosy-home dreamers and anyone
+                who loves owning something with a story behind it.
+                Browse at your own pace; the good things are worth
+                noticing. ♡
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================
+         PRODUCT CATEGORIES
+    ===================================== -->
+
+    <section class="home-section">
+
+        <div class="home-kicker">
+            A FEW WORLDS TO WANDER THROUGH
+        </div>
+
+        <h2>
+            Different hands.<br>
+            Different kinds of wonder.
+        </h2>
+
+        <p>
+            Each Artify category has its own mood — from expressive
+            and bold to soft, playful, delicate or earthy. Follow
+            your curiosity and find the piece that feels like you.
+        </p>
+
+        <div class="craft-strip">
+
+            <article class="craft-tile">
+                <span class="emoji">🖼️</span>
+
+                <strong>Paintings</strong>
+
+                <small>
+                    Colour, feeling and a point of view for walls
+                    that deserve a story.
+                </small>
+            </article>
+
+            <article class="craft-tile">
+                <span class="emoji">🧵</span>
+
+                <strong>Craft &amp; Crochet</strong>
+
+                <small>
+                    Texture, patience and tiny details turned
+                    into useful treasures.
+                </small>
+            </article>
+
+            <article class="craft-tile">
+                <span class="emoji">💍</span>
+
+                <strong>Jewellery</strong>
+
+                <small>
+                    Little keepsakes that make everyday outfits
+                    feel personal.
+                </small>
+            </article>
+
+            <article class="craft-tile">
+                <span class="emoji">🏺</span>
+
+                <strong>Home &amp; Flowers</strong>
+
+                <small>
+                    Warm corners, thoughtful accents and blooms
+                    made to last.
+                </small>
+            </article>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================
+         CUSTOMER JOURNEY
+    ===================================== -->
+
+    <section class="home-section">
+
+        <div class="home-kicker">
+            FROM IDEA TO YOUR DOOR
+        </div>
+
+        <h2>A small journey, full of care.</h2>
+
+        <p>
+            We want shopping for handmade things to feel calm
+            and clear. Here is the spirit of the journey —
+            discover a piece, learn its story, make it yours,
+            and keep the excitement going while it travels to you.
+        </p>
+
+        <div class="journey-flow">
+
+            <div class="journey-step">
+                <span class="step-icon">🔎</span>
+
+                <strong>01 · Discover</strong>
+
+                <p>
+                    Explore pieces that catch your eye.
+                </p>
+            </div>
+
+            <div class="journey-step">
+                <span class="step-icon">♡</span>
+
+                <strong>02 · Choose</strong>
+
+                <p>
+                    Save favourites or add a treasure to your cart.
+                </p>
+            </div>
+
+            <div class="journey-step">
+                <span class="step-icon">📦</span>
+
+                <strong>03 · Prepare</strong>
+
+                <p>
+                    Your order is recorded and ready for its next step.
+                </p>
+            </div>
+
+            <div class="journey-step">
+                <span class="step-icon">🏡</span>
+
+                <strong>04 · Enjoy</strong>
+
+                <p>
+                    Welcome a little handmade joy into your space.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================
+         STUDIO QUOTE
+    ===================================== -->
+
+    <section class="quote-wall">
+
+        <div class="home-kicker" style="color: #fff;">
+            A NOTE FROM OUR STUDIO
+        </div>
+
+        <blockquote>
+            “The beauty of handmade is not that every piece is
+            flawless. It is that every piece carries a little
+            bit of someone.”
+        </blockquote>
+
+        <p>
+            Keep the things that make you feel something.
+            Gift the things that say what words cannot.
+            Let your everyday spaces tell your story. ✨
+        </p>
+
+    </section>
+
+    <!-- =====================================
+         THOUGHTFUL DESIGN
+    ===================================== -->
+
+    <section class="home-section manifesto">
+
+        <div>
+
+            <div class="home-kicker">
+                THOUGHTFUL BY DESIGN
+            </div>
+
+            <h2>
+                Less ordinary.<br>
+                More meaningful.
+            </h2>
+
+        </div>
+
+        <div>
+
+            <p>
+                Artify is built around the joy of finding a piece
+                that feels unexpectedly right. We bring the browsing
+                conveniences of an online store together with the
+                warmth and individuality of handmade work: clear
+                product details, searchable collections, filters,
+                wishlists, order history and a simple sample
+                checkout flow.
+            </p>
+
+            <p>
+                We are always making room for new ideas — seasonal
+                colours, personal commissions, special gifting and
+                creative experiments. If you can imagine a meaningful
+                gift or a detail that would make your space brighter,
+                our custom-art request page is a place to begin.
+            </p>
+
+            <p>
+                Thank you for supporting creativity, patient making
+                and independent craft. Every visit helps keep these
+                small stories moving from one pair of hands to
+                another. 🌿
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================
+         FINAL SECTION
+    ===================================== -->
+
+    <section class="home-ending">
+
+        <div class="final-mark">✿ ✧ ♡</div>
+
+        <div class="home-kicker">
+            YOUR NEXT LITTLE TREASURE IS WAITING
+        </div>
+
+        <h2>Follow the feeling.</h2>
+
+        <p>
+            Start with a colour, a texture, a memory or a simple
+            “that would make someone smile.” Wander through the
+            collection and see what finds you. Thank you for
+            making room in your life for things made with care.
+        </p>
+
+    </section>
+
+</main>
+
+<!-- JavaScript Files -->
+<script src="products.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof themeInit === "function") {
+            themeInit();
+        }
+    });
+</script>
+
+
+</body>
+
+</html>

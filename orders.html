@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Artify | Orders</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Page heading */
+        .page-heading p {
+            margin-top: 6px;
+        }
+
+        /* Keyboard focus */
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible,
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid var(--accent, #a65a3d);
+            outline-offset: 3px;
+        }
+
+        /* Custom confirmation popup overlay */
+      
+.cancel-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 20, 15, 0.65);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 99999;
+}
+
+.cancel-modal-overlay.show {
+    display: flex;
+}
+
+.cancel-modal-box {
+    background: #ffffff !important;
+    color: #4d2f20 !important;
+    width: 100%;
+    max-width: 390px;
+    padding: 28px 24px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+    animation: cancelPopupIn 0.2s ease-out;
+}
+
+.cancel-modal-box h2 {
+    color: #4d2f20 !important;
+    font-size: 23px;
+    margin: 0 0 10px;
+}
+
+.cancel-modal-box p {
+    color: #5f5149 !important;
+    margin: 0 0 24px;
+    line-height: 1.6;
+    opacity: 1 !important;
+    font-size: 15px;
+}
+
+.cancel-modal-icon {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+.cancel-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cancel-modal-actions button {
+    padding: 11px 20px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.cancel-keep-btn {
+    background: #eee5df;
+    color: #4d2f20;
+}
+
+.cancel-confirm-btn {
+    background: #a65a3d;
+    color: #ffffff;
+}
+
+.cancel-confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+
+        /* Popup animation */
+        @keyframes cancelPopupIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Mobile layout */
+        @media (max-width: 420px) {
+            .cancel-modal-box {
+                padding: 24px 18px;
+            }
+
+            .cancel-modal-actions {
+                flex-direction: column;
+            }
+
+            .cancel-modal-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Orders page content -->
+    <main>
+        <div id="content">
+            <div class="loading-card">
+                Loading your orders…
+            </div>
+        </div>
+    </main>
+
+    <!-- Order cancellation popup -->
+    <div
+        class="cancel-modal-overlay"
+        id="cancelModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cancelModalTitle"
+        aria-describedby="cancelModalMessage"
+        aria-hidden="true"
+    >
+        <div class="cancel-modal-box">
+
+            <div
+                class="cancel-modal-icon"
+                id="cancelModalIcon"
+                aria-hidden="true"
+            >
+                📦
+            </div>
+
+            <h2 id="cancelModalTitle">
+                Cancel Order?
+            </h2>
+
+            <p id="cancelModalMessage">
+                Are you sure you want to cancel this order?
+            </p>
+
+            <div class="cancel-modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-keep-btn"
+                    id="cancelKeepBtn"
+                >
+                    Keep Order
+                </button>
+
+                <button
+                    type="button"
+                    class="cancel-confirm-btn"
+                    id="cancelConfirmBtn"
+                >
+                    Yes, Cancel
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Project JavaScript files -->
+    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        // Store the current user's orders.
+        let myOrders = [];
+
+        // Store the order awaiting cancellation.
+        let pendingCancelOrderId = null;
+
+        // Keep track of the previously focused element.
+        let previousCancelFocus = null;
+
+
+        // ==========================================
+        // LOAD ORDERS
+        // ==========================================
+
+        async function ordersPage() {
+            base();
+
+            if (!currentUser || !currentUser.id) {
+                return go('login.html');
+            }
+
+            const target = $('#content');
+
+            try {
+                const response = await fetch(
+                    `/api/users/${currentUser.id}/orders`,
+                    {
+                        cache: 'no-store'
+                    }
+                );
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        payload.error || 'Could not load your orders.'
+                    );
+                }
+
+                myOrders = payload.orders || [];
+                window.__artifyOrders = myOrders;
+
+            } catch (error) {
+                target.innerHTML = `
+                    <div class="cart-error">
+                        <h2>Unable to load orders</h2>
+
+                        <p>
+                            ${escapeOrderHTML(error.message)}
+                        </p>
+
+                        <button
+                            class="btn"
+                            onclick="ordersPage()"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                `;
+
+                return;
+            }
+
+            const ordersHTML = myOrders.length
+                ? myOrders.map(order => `
+                    <article class="order-card">
+
+                        <div class="order-top">
+
+                            <div>
+                                <span>
+                                    ORDER #${escapeOrderHTML(order.id)}
+                                </span>
+
+                                <h2>
+                                    ${new Date(
+                                        order.createdAt || order.created_at
+                                    ).toLocaleDateString('en-IN')}
+                                </h2>
+                            </div>
+
+                            <span class="status ${
+                                escapeOrderHTML(
+                                    String(order.status || 'Placed').toLowerCase()
+                                )
+                            }">
+                                ${escapeOrderHTML(order.status || 'Placed')}
+                            </span>
+
+                        </div>
+
+                        <div class="order-items">
+                            ${(order.items || []).map(item => `
+                                <span>
+                                    ${escapeOrderHTML(item.name)}
+                                    × ${Number(item.quantity || 1)}
+                                </span>
+                            `).join(' · ')}
+                        </div>
+
+                        <div class="order-actions" style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0">
+                            <button class="btn small" type="button" onclick="downloadInvoice(${Number(order.id)})">Download Invoice ↓</button>
+                        </div>
+
+                        <div class="order-meta">
+
+                            <b>${money(order.total)}</b>
+
+                            <span>
+                                ${escapeOrderHTML(
+                                    order.paymentMethod ||
+                                    order.payment_method ||
+                                    '—'
+                                )}
+                            </span>
+
+                            <span>
+                                ${escapeOrderHTML(
+                                    typeof order.address === 'string'
+                                        ? order.address
+                                        : (order.address?.address || '')
+                                )}
+                            </span>
+
+                            <span>
+                                Contact:
+                                ${escapeOrderHTML(
+                                    order.phone ||
+                                    order.customerPhone ||
+                                    '—'
+                                )}
+                            </span>
+
+                        </div>
+
+                        <div class="order-actions">
+
+                            <button
+                                class="btn small"
+                                onclick="buyAgain(${Number(order.id)})"
+                            >
+                                Buy Again
+                            </button>
+
+                            ${
+                                order.status !== 'Cancelled' &&
+                                order.status !== 'Delivered'
+                                    ? `
+                                        <button
+                                            class="btn small secondary"
+                                            onclick="cancelOrder(${Number(order.id)})"
+                                        >
+                                            Cancel Order
+                                        </button>
+
+                                        <button
+                                            class="btn small secondary"
+                                            onclick="editDelivery(${Number(order.id)})"
+                                        >
+                                            Update address/contact
+                                        </button>
+                                    `
+                                    : ''
+                            }
+
+                            <a
+                                class="btn small secondary"
+                                href="track-order.html?id=${encodeURIComponent(order.id)}"
+                            >
+                                Track Order
+                            </a>
+
+                        </div>
+
+                    </article>
+                `).join('')
+
+                : `
+                    <div class="empty-panel">
+
+                        <span>📦</span>
+
+                        <h2>No orders yet</h2>
+
+                        <p>
+                            Your handmade finds will appear here.
+                        </p>
+
+                        <a class="btn" href="products.html">
+                            Start Shopping
+                        </a>
+
+                    </div>
+                `;
+
+            target.innerHTML = `
+                <div class="page-heading">
+
+                    <div>
+                        <div class="eyebrow">
+                            ORDER HISTORY
+                        </div>
+
+                        <h1>My Orders</h1>
+
+                        <p>
+                            ${myOrders.length}
+                            order${myOrders.length === 1 ? '' : 's'}
+                            placed
+                        </p>
+                    </div>
+
+                </div>
+
+                ${ordersHTML}
+            `;
+        }
+
+
+        // ==========================================
+        // ESCAPE HTML
+        // ==========================================
+
+        function escapeOrderHTML(value) {
+            return String(value ?? '').replace(
+                /[&<>"']/g,
+                character => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                })[character]
+            );
+        }
+
+
+        // ==========================================
+        // BUY AGAIN
+        // ==========================================
+
+        async function buyAgain(id) {
+            const order = myOrders.find(
+                item => Number(item.id) === Number(id)
+            );
+
+            (order?.items || []).forEach(item => {
+                const productId = Number(
+                    item.productId ?? item.id
+                );
+
+                const quantity = Number(item.quantity || 1);
+
+                if (!cart.includes(productId)) {
+                    cart.push(productId);
+                    cartQty[productId] = quantity;
+                } else {
+                    cartQty[productId] =
+                        Number(cartQty[productId] || 1) + quantity;
+                }
+            });
+
+            persist();
+            counts();
+
+            toast('Order items added to cart');
+
+            setTimeout(() => {
+                go('cart.html');
+            }, 450);
+        }
+
+
+        // ==========================================
+        // OPEN CANCELLATION POPUP
+        // ==========================================
+
+        function cancelOrder(id) {
+            const order = myOrders.find(
+                item => Number(item.id) === Number(id)
+            );
+
+            if (!order) {
+                toast('Order not found.');
+                return;
+            }
+
+            if (
+                order.status === 'Cancelled' ||
+                order.status === 'Delivered'
+            ) {
+                toast('This order cannot be cancelled.');
+                return;
+            }
+
+            pendingCancelOrderId = Number(id);
+
+            previousCancelFocus = document.activeElement;
+
+            const modal = document.getElementById('cancelModal');
+
+            document.getElementById(
+                'cancelModalTitle'
+            ).textContent = 'Cancel Order?';
+
+            document.getElementById(
+                'cancelModalIcon'
+            ).textContent = '📦';
+
+            document.getElementById(
+                'cancelModalMessage'
+            ).textContent =
+                `Are you sure you want to cancel order #${id}?`;
+
+            const confirmButton = document.getElementById(
+                'cancelConfirmBtn'
+            );
+
+            confirmButton.textContent = 'Yes, Cancel';
+            confirmButton.disabled = false;
+
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+
+            document.getElementById('cancelKeepBtn').focus();
+        }
+
+
+        // ==========================================
+        // CLOSE CANCELLATION POPUP
+        // ==========================================
+
+        function closeCancelModal() {
+            const modal = document.getElementById('cancelModal');
+
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+
+            pendingCancelOrderId = null;
+
+            const previousElement = previousCancelFocus;
+
+            previousCancelFocus = null;
+
+            if (previousElement && previousElement.isConnected) {
+                previousElement.focus();
+            }
+        }
+
+
+        // ==========================================
+        // KEEP ORDER
+        // ==========================================
+
+        document.getElementById('cancelKeepBtn')
+            .addEventListener('click', () => {
+                closeCancelModal();
+            });
+
+
+        // ==========================================
+        // CLOSE WHEN OVERLAY IS CLICKED
+        // ==========================================
+
+        document.getElementById('cancelModal')
+            .addEventListener('click', event => {
+                if (event.target.id === 'cancelModal') {
+                    closeCancelModal();
+                }
+            });
+
+
+        // ==========================================
+        // CLOSE WITH ESCAPE KEY
+        // ==========================================
+
+        document.addEventListener('keydown', event => {
+            const modal = document.getElementById('cancelModal');
+
+            if (
+                event.key === 'Escape' &&
+                modal.classList.contains('show')
+            ) {
+                closeCancelModal();
+            }
+        });
+
+
+        // ==========================================
+        // CONFIRM ORDER CANCELLATION
+        // ==========================================
+
+        document.getElementById('cancelConfirmBtn')
+            .addEventListener('click', async () => {
+
+                const id = pendingCancelOrderId;
+
+                if (id === null) {
+                    return;
+                }
+
+                const button = document.getElementById(
+                    'cancelConfirmBtn'
+                );
+
+                button.disabled = true;
+                button.textContent = 'Cancelling...';
+
+                try {
+                    const response = await fetch(
+                        `/api/orders/${id}`,
+                        {
+                            method: 'PATCH',
+
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+
+                            body: JSON.stringify({
+                                status: 'Cancelled'
+                            })
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error || 'Could not cancel order.'
+                        );
+                    }
+
+                    closeCancelModal();
+
+                    toast('Order cancelled successfully!');
+
+                    await ordersPage();
+
+                } catch (error) {
+                    document.getElementById(
+                        'cancelModalTitle'
+                    ).textContent = 'Unable to Cancel';
+
+                    document.getElementById(
+                        'cancelModalIcon'
+                    ).textContent = '⚠️';
+
+                    document.getElementById(
+                        'cancelModalMessage'
+                    ).textContent =
+                        error.message ||
+                        'Something went wrong. Please try again.';
+
+                    button.textContent = 'Try Again';
+                    button.disabled = false;
+
+                    // Keep the order ID so the user can retry.
+                    pendingCancelOrderId = id;
+                }
+            });
+
+
+        // ==========================================
+        // UPDATE DELIVERY DETAILS
+        // ==========================================
+
+        async function editDelivery(id) {
+            const order = myOrders.find(
+                item => Number(item.id) === Number(id)
+            );
+
+            const address = prompt(
+                'Enter the updated delivery address:',
+                typeof order?.address === 'string'
+                    ? order.address
+                    : (order?.address?.address || '')
+            );
+
+            if (address === null || !address.trim()) {
+                return;
+            }
+
+            const phone = prompt(
+                'Enter the updated contact number (10–15 digits):',
+                order?.phone ||
+                order?.customerPhone ||
+                currentUser.phone ||
+                ''
+            );
+
+            if (phone === null) {
+                return;
+            }
+
+            if (!/^\d{10,15}$/.test(phone.replace(/\D/g, ''))) {
+                toast('Enter a valid contact number.');
+                return;
+            }
+
+            const cleanPhone = phone.replace(/\D/g, '');
+
+            try {
+                const response = await fetch(
+                    `/api/orders/${id}/delivery`,
+                    {
+                        method: 'PATCH',
+
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+
+                        body: JSON.stringify({
+                            userId: currentUser.id,
+                            address: address.trim(),
+                            phone: cleanPhone
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        'Unable to update delivery details.'
+                    );
+                }
+
+                currentUser.address = address.trim();
+                currentUser.phone = cleanPhone;
+
+                persist();
+
+                const userResponse = await fetch(
+                    `/api/users/${currentUser.id}`,
+                    {
+                        method: 'PUT',
+
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+
+                        body: JSON.stringify({
+                            address: address.trim(),
+                            phone: cleanPhone
+                        })
+                    }
+                );
+
+                if (!userResponse.ok) {
+                    toast(
+                        'Order updated, but profile details could not be updated.'
+                    );
+
+                    await ordersPage();
+                    return;
+                }
+
+                toast('Delivery address and contact updated.');
+
+                await ordersPage();
+
+            } catch (error) {
+                toast(error.message);
+            }
+        }
+
+
+        function downloadInvoice(orderId) {
+            const order = (window.__artifyOrders || []).find(o => Number(o.id) === Number(orderId));
+            if (!order) { toast('Order details are not loaded yet.'); return; }
+            const esc = value => escapeOrderHTML(String(value ?? ''));
+            const items = (order.items || []).map(item => `<tr><td>${esc(item.name)}</td><td>${Number(item.quantity || 1)}</td><td>₹${Number(item.price || item.final_price || 0).toLocaleString('en-IN')}</td><td>₹${Number(item.line_total || item.itemTotal || item.lineTotal || ((item.price || item.final_price || 0) * (item.quantity || 1))).toLocaleString('en-IN')}</td></tr>`).join('');
+            const html = `<!doctype html><html><head><meta charset="utf-8"><title>Artify Invoice #${order.id}</title><style>body{font-family:Arial,sans-serif;max-width:850px;margin:35px auto;color:#4d2f20;padding:20px}h1{color:#7a4b32}table{width:100%;border-collapse:collapse;margin-top:25px}th,td{padding:12px;border:1px solid #ddd;text-align:left}th{background:#f8f1eb}.total{text-align:right;font-size:20px;margin-top:25px}.muted{color:#777}</style></head><body><h1>Artify</h1><p>THE HANDMADE UNIVERSE</p><h2>INVOICE #${order.id}</h2><p>Date: ${new Date(order.createdAt || order.created_at || Date.now()).toLocaleDateString('en-IN')}</p><p>Customer: ${esc(order.customerName || currentUser?.name || '')}<br>Email: ${esc(order.customerEmail || currentUser?.email || '')}<br>Delivery address: ${esc(order.address || '')}<br>Contact: ${esc(order.phone || order.customerPhone || '')}</p><table><thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Amount</th></tr></thead><tbody>${items}</tbody></table><p class="total"><b>Total: ₹${Number(order.total || 0).toLocaleString('en-IN')}</b></p><p class="muted">Thank you for supporting handmade art.</p><script>window.onload=()=>window.print()<\/script></body></html>`;
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `Artify-Invoice-${order.id}.html`; a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+        }
+
+        // ==========================================
+        // INITIALIZE ORDERS PAGE
+        // ==========================================
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            ordersPage
+        );
+    </script>
+
+</body>
+
+</html>
+

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Artify | Custom Art
+  </title>
+  <link href="style.css" rel="stylesheet"/>
+ 
+  <style>
+    /* Small page-specific polish; complex reusable layouts live in style.css. */
+    .page-heading p { margin-top: 6px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent, #a65a3d); outline-offset: 3px; }
+  </style>
+</head>
+ <body>
+  <main>
+   <div class="page-heading">
+    <div>
+     <div class="eyebrow">
+      PERSONALISED CREATIONS
+     </div>
+     <h1>
+      Custom Art
+     </h1>
+     <p>
+      Tell an Artify maker what you imagine. Your request is stored in your account.
+     </p>
+    </div>
+   </div>
+   <div class="custom-layout">
+    <section class="form-card">
+     <h2>
+      Create a brief
+     </h2>
+     <form id="customForm">
+      <label>
+       Project title
+      </label>
+      <input name="title" placeholder="e.g. Family portrait" required=""/>
+      <label>
+       Description
+      </label>
+      <textarea name="description" placeholder="Describe what you want..." required=""></textarea>
+      <label>
+       Style
+      </label>
+      <input name="style" placeholder="Watercolour, minimal, boho..."/>
+      <label>
+       Budget
+      </label>
+      <input name="budget" placeholder="₹" type="number"/>
+      <button class="btn full">
+       Save Custom Request
+      </button>
+     </form>
+    </section>
+    <section>
+     <div class="eyebrow">
+      SAVED REQUESTS
+     </div>
+     <h2>
+      Your ideas
+     </h2>
+     <div id="savedArt">
+     </div>
+    </section>
+   </div>
+  </main>
+  <script src="products.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+ 
+
+  <script>
+    // Page-specific behavior for custom-art.html
+async function customArtPage(){base();if(!currentUser)return go('login.html');const saved=$('#savedArt');const load=async()=>{const rows=await fetch(`/api/custom-art/${currentUser.id}`).then(r=>r.json());saved.innerHTML=rows.length?rows.map(x=>`<article class="custom-card"><div><div class="eyebrow">CUSTOM REQUEST #${x.id}</div><h3>${x.title}</h3><p>${x.description}</p><small>${x.style||'Style not specified'} · ${x.budget?money(x.budget):'Budget flexible'}</small></div><div><button class="btn small secondary" onclick='editArt(${x.id},${JSON.stringify(x)})'>Edit</button><button class="remove-btn" onclick="deleteArt(${x.id})">Delete</button></div></article>`).join(''):'<div class="empty-panel compact"><span>✦</span><h3>No custom requests yet</h3><p>Create your first personalised artwork brief.</p></div>';};
+  $('#customForm').onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));d.user_id=currentUser.id;await fetch('/api/custom-art',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});e.target.reset();toast('Custom art request saved');load();};load();
+}
+  </script>
+
+  <script>
+    // Page-specific behavior for custom-art.html
+async function editArt(id,x){const title=prompt('Title',x.title);if(title===null)return;const description=prompt('Description',x.description);const style=prompt('Style',x.style||'');const budget=prompt('Budget',x.budget||'');await fetch(`/api/custom-art/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description,style,budget})});toast('Custom art updated');customArtPage();}
+  </script>
+
+  <script>
+    // Page-specific behavior for custom-art.html
+async function deleteArt(id){await fetch(`/api/custom-art/${id}`,{method:'DELETE'});toast('Custom art request deleted');customArtPage();}
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      customArtPage();
+    });
+  </script>
+ </body>
+</html>

@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Artify | Shopping Cart</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* ==========================================
+           PAGE HEADING
+        ========================================== */
+
+        .page-heading p {
+            margin-top: 6px;
+        }
+
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible,
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid var(--accent, #a65a3d);
+            outline-offset: 3px;
+        }
+
+        /* ==========================================
+           COUPON BOX
+        ========================================== */
+
+        .offer-box {
+            margin: 18px 0;
+            padding: 18px;
+            border: 1px dashed var(--accent, #a65a3d);
+            border-radius: 12px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .offer-box h3 {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.4;
+        }
+
+        .offer-box p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        /* Coupon input and button */
+
+        .coupon-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+
+            width: 100%;
+        }
+
+        .coupon-row input {
+            display: block;
+
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+
+            box-sizing: border-box;
+            padding: 16px;
+
+            border: 1px solid #ccc;
+            border-radius: 10px;
+
+            background: #fff;
+            color: #222;
+
+            font-size: 15px;
+            text-align: left;
+        }
+
+        .coupon-row input::placeholder {
+            color: #777;
+        }
+
+        .coupon-row button {
+            display: block;
+
+            padding: 16px 28px;
+            min-width: 100px;
+            min-height: 50px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: var(--accent, #a65a3d);
+            color: #fff;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .coupon-row button:hover {
+            opacity: 0.9;
+        }
+
+        /* Coupon error and success messages */
+
+        .offer-message {
+            display: block;
+            width: 100%;
+
+            margin-top: 0;
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            overflow-wrap: anywhere;
+        }
+
+        .offer-message:empty {
+            display: none;
+        }
+
+        .offer-message.success {
+            color: #218838;
+        }
+
+        .offer-message.error {
+            color: #c0392b;
+        }
+
+        /* ==========================================
+           PRICE DISCOUNTS
+        ========================================== */
+
+        .discount-line {
+            color: #218838;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            opacity: 0.65;
+            margin-right: 8px;
+        }
+
+        .discounted-price {
+            color: #218838;
+            font-weight: bold;
+        }
+
+        /* ==========================================
+           QUANTITY CONTROLS
+        ========================================== */
+
+        .quantity-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .quantity-box button {
+            min-width: 30px;
+            min-height: 30px;
+            cursor: pointer;
+        }
+
+        /* ==========================================
+           ORDER SUMMARY
+        ========================================== */
+
+        .summary > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .summary-total {
+            font-size: 18px;
+        }
+
+        .summary hr {
+            margin: 14px 0;
+        }
+
+        /* ==========================================
+           ERROR PANEL
+        ========================================== */
+
+        .cart-error {
+            padding: 18px;
+            margin: 20px 0;
+
+            border: 1px solid #c0392b;
+            border-radius: 10px;
+        }
+
+        /* ==========================================
+           RESPONSIVE DESIGN
+        ========================================== */
+
+        @media (max-width: 600px) {
+            .offer-box {
+                padding: 16px;
+            }
+
+            .offer-box h3 {
+                font-size: 21px;
+            }
+
+            .coupon-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .coupon-row input,
+            .coupon-row button {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <div id="content">
+            <p style="padding: 24px;">
+                Loading your cart...
+            </p>
+        </div>
+    </main>
+
+    <!-- Load product data before the main application script. -->
+
+    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        /*
+         * ==========================================
+         * ARTIFY SHOPPING CART
+         * ==========================================
+         *
+         * CATEGORY DISCOUNTS:
+         *
+         * Paintings  - 15%
+         * Crafts     - 10%
+         * Crochet    - 12%
+         * Home Decor - 15%
+         * Jewellery  - 10%
+         * Bouquets   - 12%
+         *
+         * COUPON:
+         *
+         * ARTIFY100
+         * ₹100 discount when original subtotal >= ₹999.
+         *
+         * COUPON LAYOUT:
+         *
+         * 1. Have a coupon?
+         * 2. Coupon description
+         * 3. Coupon input
+         * 4. Apply button
+         * 5. Error / success message
+         */
+
+        // ==========================================
+        // CATEGORY DISCOUNT CONFIGURATION
+        // ==========================================
+
+        const categoryDiscounts = {
+            "Paintings": 15,
+            "Crafts": 10,
+            "Crochet": 12,
+            "Home Decor": 15,
+            "Jewellery": 10,
+            "Bouquets": 12
+        };
+
+        let appliedCoupon = "";
+
+        let cartReady = false;
+        let cartLoadingError = false;
+
+        // Store the current coupon feedback.
+        let couponFeedback = {
+            message: "",
+            type: ""
+        };
+
+
+        // ==========================================
+        // SAFE NUMBER CONVERSION
+        // ==========================================
+
+        function safeNumber(value, fallback = 0) {
+            const number = Number(value);
+
+            return Number.isFinite(number)
+                ? number
+                : fallback;
+        }
+
+
+        // ==========================================
+        // CATEGORY DISCOUNT CALCULATION
+        // ==========================================
+
+        function getCategoryDiscount(product) {
+            const percentage =
+                categoryDiscounts[product.category] || 0;
+
+            return Math.round(
+                safeNumber(product.price) * percentage / 100
+            );
+        }
+
+
+        // ==========================================
+        // PRODUCT FINAL PRICE
+        // ==========================================
+
+        function getProductFinalPrice(product) {
+            return Math.max(
+                0,
+                safeNumber(product.price) -
+                getCategoryDiscount(product)
+            );
+        }
+
+
+        // ==========================================
+        // REFRESH PRODUCT PRICES
+        // ==========================================
+
+        async function refreshCartProductPrices() {
+
+            if (typeof loadUpdatedProducts !== "function") {
+                throw new Error(
+                    "loadUpdatedProducts() is missing from app.js."
+                );
+            }
+
+            const loaded = await loadUpdatedProducts();
+
+            if (loaded === false) {
+                throw new Error(
+                    "Unable to load the latest product prices."
+                );
+            }
+        }
+
+
+        // ==========================================
+        // CALCULATE CART TOTALS
+        // ==========================================
+
+        function calculateCartTotals() {
+
+            const items = cart
+                .map(id => productById(id))
+                .filter(Boolean);
+
+            let subtotal = 0;
+            let categoryDiscountTotal = 0;
+            let itemCount = 0;
+
+            // Calculate original subtotal and category discounts.
+
+            items.forEach(product => {
+
+                const quantity = Math.max(
+                    1,
+                    Math.floor(
+                        safeNumber(cartQty[product.id], 1)
+                    )
+                );
+
+                subtotal +=
+                    safeNumber(product.price) * quantity;
+
+                categoryDiscountTotal +=
+                    getCategoryDiscount(product) * quantity;
+
+                itemCount += quantity;
+            });
+
+            // Subtotal after category discounts.
+
+            const afterCategoryDiscount = Math.max(
+                0,
+                subtotal - categoryDiscountTotal
+            );
+
+            let couponDiscount = 0;
+
+            // Validate the applied coupon.
+
+            if (appliedCoupon === "ARTIFY100") {
+
+                if (subtotal >= 999) {
+                    couponDiscount = 100;
+                }
+            }
+
+            // Prevent negative totals.
+
+            couponDiscount = Math.min(
+                couponDiscount,
+                afterCategoryDiscount
+            );
+
+            const finalTotal = Math.max(
+                0,
+                afterCategoryDiscount - couponDiscount
+            );
+
+            return {
+                items,
+                subtotal,
+                categoryDiscountTotal,
+                couponDiscount,
+                finalTotal,
+                itemCount
+            };
+        }
+
+
+        // ==========================================
+        // RENDER CART
+        // ==========================================
+
+        function renderCart() {
+
+            if (!cartReady || cartLoadingError) {
+                return;
+            }
+
+            if (typeof base === "function") {
+                base();
+            }
+
+            const target =
+                document.getElementById("content");
+
+            if (!target) {
+                return;
+            }
+
+            const totals = calculateCartTotals();
+
+            const {
+                items,
+                subtotal,
+                categoryDiscountTotal,
+                couponDiscount,
+                finalTotal,
+                itemCount
+            } = totals;
+
+
+            // ==========================================
+            // CART HTML
+            // ==========================================
+
+            target.innerHTML = `
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            YOUR BAG
+                        </div>
+
+                        <h1>
+                            Shopping Cart
+                        </h1>
+
+                        <p>
+                            ${itemCount}
+                            item${itemCount === 1 ? "" : "s"}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    items.length
+
+                    ? `
+
+                        <div class="cart-layout">
+
+
+                            <!-- CART ITEMS -->
+
+                            <div>
+
+                                ${items.map(product => {
+
+                                    const quantity = Math.max(
+                                        1,
+                                        Math.floor(
+                                            safeNumber(
+                                                cartQty[product.id],
+                                                1
+                                            )
+                                        )
+                                    );
+
+                                    const discount =
+                                        getCategoryDiscount(product);
+
+                                    const finalPrice =
+                                        getProductFinalPrice(product);
+
+                                    const percentage =
+                                        categoryDiscounts[
+                                            product.category
+                                        ] || 0;
+
+
+                                    return `
+
+                                        <article class="cart-row">
+
+
+                                            <!-- PRODUCT IMAGE -->
+
+                                            <div class="cart-visual ${product.palette || ""}">
+
+                                                <img
+                                                    src="${product.image}"
+                                                    alt="${product.name}"
+                                                    loading="lazy"
+                                                >
+
+                                            </div>
+
+
+                                            <!-- PRODUCT DETAILS -->
+
+                                            <div class="cart-details">
+
+                                                <div class="eyebrow">
+                                                    ${product.category}
+                                                </div>
+
+                                                <h3>
+                                                    ${product.name}
+                                                </h3>
+
+                                                <p>
+                                                    ${product.description || ""}
+                                                </p>
+
+
+                                                <!-- PRODUCT PRICE -->
+
+                                                <div>
+
+                                                    ${
+                                                        discount > 0
+
+                                                        ? `
+
+                                                            <span class="original-price">
+                                                                ${money(product.price)}
+                                                            </span>
+
+                                                            <span class="discounted-price">
+                                                                ${money(finalPrice)}
+                                                            </span>
+
+                                                            <p class="discount-line">
+
+                                                                ${percentage}% category offer
+
+                                                                — Save
+                                                                ${money(discount)}
+                                                                per item
+
+                                                            </p>
+
+                                                        `
+
+                                                        : `
+
+                                                            <strong>
+                                                                ${money(product.price)}
+                                                            </strong>
+
+                                                        `
+                                                    }
+
+                                                </div>
+
+
+                                                <!-- QUANTITY -->
+
+                                                <div class="quantity-box">
+
+                                                    <span>
+                                                        Quantity
+                                                    </span>
+
+                                                    <button
+                                                        type="button"
+                                                        onclick="changeCartQuantity(${product.id}, -1)"
+                                                        aria-label="Decrease quantity"
+                                                        ${quantity <= 1 ? "disabled" : ""}
+                                                    >
+                                                        −
+                                                    </button>
+
+                                                    <b>
+                                                        ${quantity}
+                                                    </b>
+
+                                                    <button
+                                                        type="button"
+                                                        onclick="changeCartQuantity(${product.id}, 1)"
+                                                        aria-label="Increase quantity"
+                                                    >
+                                                        +
+                                                    </button>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <!-- REMOVE PRODUCT -->
+
+                                            <button
+                                                class="remove-btn"
+                                                type="button"
+                                                onclick="removeCartItem(${product.id})"
+                                            >
+                                                Remove
+                                            </button>
+
+
+                                        </article>
+
+                                    `;
+
+                                }).join("")}
+
+                            </div>
+
+
+
+                            <!-- ORDER SUMMARY -->
+
+                            <aside class="summary">
+
+                                <h2>
+                                    Order Summary
+                                </h2>
+
+
+                                <!-- ORIGINAL SUBTOTAL -->
+
+                                <div>
+
+                                    <span>
+                                        Subtotal
+                                    </span>
+
+                                    <b>
+                                        ${money(subtotal)}
+                                    </b>
+
+                                </div>
+
+
+                                <!-- CATEGORY DISCOUNTS -->
+
+                                <div class="discount-line">
+
+                                    <span>
+                                        Category discounts
+                                    </span>
+
+                                    <b>
+                                        − ${money(categoryDiscountTotal)}
+                                    </b>
+
+                                </div>
+
+
+                                <!-- DELIVERY -->
+
+                                <div>
+
+                                    <span>
+                                        Delivery
+                                    </span>
+
+                                    <b>
+                                        FREE
+                                    </b>
+
+                                </div>
+
+
+
+                                <!-- Coupon entry is handled on checkout.html. -->
+
+                                <!-- COUPON DISCOUNT -->
+
+                                ${
+                                    couponDiscount > 0
+
+                                    ? `
+
+                                        <div class="discount-line">
+
+                                            <span>
+                                                Coupon discount
+                                            </span>
+
+                                            <b>
+                                                − ${money(couponDiscount)}
+                                            </b>
+
+                                        </div>
+
+                                    `
+
+                                    : ""
+                                }
+
+
+
+                                <!-- TOTAL SEPARATOR -->
+
+                                <hr>
+
+
+
+                                <!-- FINAL TOTAL -->
+
+                                <div class="summary-total">
+
+                                    <span>
+                                        Total
+                                    </span>
+
+                                    <b>
+                                        ${money(finalTotal)}
+                                    </b>
+
+                                </div>
+
+
+
+                                <!-- CHECKOUT BUTTON -->
+
+                                <a
+                                    class="btn full"
+                                    href="checkout.html"
+                                >
+                                    Proceed to Checkout
+                                </a>
+
+
+
+                                <!-- INFORMATION -->
+
+                                <p style="margin-top: 12px; font-size: 13px;">
+
+                                    Product prices are refreshed from the server.
+                                    Category discounts are calculated automatically.
+
+                                </p>
+
+
+                            </aside>
+
+
+                        </div>
+
+                    `
+
+                    : `
+
+                        <!-- EMPTY CART -->
+
+                        <div class="empty-panel">
+
+                            <span>
+                                🛒
+                            </span>
+
+                            <h2>
+                                Your cart is empty
+                            </h2>
+
+                            <p>
+                                Handmade treasures are just one click away.
+                            </p>
+
+                            <a
+                                class="btn"
+                                href="products.html"
+                            >
+                                Shop Now
+                            </a>
+
+                        </div>
+
+                    `
+                }
+
+            `;
+
+
+            // Restore the coupon feedback after rendering.
+
+            updateCouponMessage();
+        }
+
+
+
+        // ==========================================
+        // APPLY COUPON
+        // ==========================================
+
+        function applyCartCoupon() {
+
+            const input =
+                document.getElementById("couponCode");
+
+            if (!input) {
+                return;
+            }
+
+            const enteredCode =
+                input.value.trim().toUpperCase();
+
+
+            // Empty input validation.
+
+            if (!enteredCode) {
+
+                appliedCoupon = "";
+
+                saveAppliedCoupon();
+
+                couponFeedback = {
+                    message: "Please enter a coupon code.",
+                    type: "error"
+                };
+
+                renderCart();
+
+                return;
+            }
+
+
+            // Invalid coupon validation.
+
+            if (enteredCode !== "ARTIFY100") {
+
+                appliedCoupon = "";
+
+                saveAppliedCoupon();
+
+                couponFeedback = {
+                    message: "Invalid coupon code. Please try ARTIFY100.",
+                    type: "error"
+                };
+
+                renderCart();
+
+                return;
+            }
+
+
+            // Check the original subtotal.
+
+            const totals = calculateCartTotals();
+
+            if (totals.subtotal < 999) {
+
+                appliedCoupon = "";
+
+                saveAppliedCoupon();
+
+                couponFeedback = {
+                    message: "Add items worth ₹999 or more to use ARTIFY100.",
+                    type: "error"
+                };
+
+                renderCart();
+
+                return;
+            }
+
+
+            // Coupon is valid.
+
+            appliedCoupon = "ARTIFY100";
+
+            saveAppliedCoupon();
+
+            couponFeedback = {
+                message: "Coupon applied! ₹100 discount added.",
+                type: "success"
+            };
+
+            renderCart();
+        }
+
+
+
+        // ==========================================
+        // SAVE APPLIED COUPON
+        // ==========================================
+
+        function saveAppliedCoupon() {
+
+            try {
+
+                if (appliedCoupon) {
+
+                    localStorage.setItem(
+                        "artifyAppliedCoupon",
+                        appliedCoupon
+                    );
+
+                } else {
+
+                    localStorage.removeItem(
+                        "artifyAppliedCoupon"
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Could not save the coupon.",
+                    error
+                );
+
+            }
+        }
+
+
+
+        // ==========================================
+        // DISPLAY COUPON MESSAGE
+        // ==========================================
+
+        function showCouponMessage(message, type) {
+
+            const element =
+                document.getElementById("couponMessage");
+
+            if (!element) {
+                return;
+            }
+
+            element.textContent = message;
+
+            element.className =
+                "offer-message " + type;
+        }
+
+
+
+        // ==========================================
+        // RESTORE COUPON MESSAGE
+        // ==========================================
+
+        function updateCouponMessage() {
+
+            const element =
+                document.getElementById("couponMessage");
+
+            if (!element) {
+                return;
+            }
+
+
+            // Display the most recent validation message.
+
+            if (couponFeedback.message) {
+
+                showCouponMessage(
+                    couponFeedback.message,
+                    couponFeedback.type
+                );
+
+                return;
+            }
+
+
+            // Restore successful coupon status.
+
+            if (appliedCoupon === "ARTIFY100") {
+
+                const totals = calculateCartTotals();
+
+                if (totals.subtotal >= 999) {
+
+                    showCouponMessage(
+                        "Coupon applied! ₹100 discount added.",
+                        "success"
+                    );
+
+                } else {
+
+                    showCouponMessage(
+                        "Your subtotal is below ₹999. The coupon is not applied.",
+                        "error"
+                    );
+
+                }
+            }
+        }
+
+
+
+        // ==========================================
+        // CHANGE PRODUCT QUANTITY
+        // ==========================================
+
+        function changeCartQuantity(productId, change) {
+
+            if (!cartReady) {
+                return;
+            }
+
+            const id = Number(productId);
+
+            const currentQuantity = Math.max(
+                1,
+                Math.floor(
+                    safeNumber(cartQty[id], 1)
+                )
+            );
+
+            const nextQuantity =
+                currentQuantity + Number(change);
+
+
+            if (nextQuantity < 1) {
+                return;
+            }
+
+
+            cartQty[id] = nextQuantity;
+
+
+            // Save the updated cart.
+
+            if (typeof persist === "function") {
+
+                persist();
+
+            } else {
+
+                localStorage.setItem(
+                    "artify_cart_qty",
+                    JSON.stringify(cartQty)
+                );
+
+            }
+
+
+            renderCart();
+        }
+
+
+
+        // ==========================================
+        // INCREASE QUANTITY
+        // ==========================================
+
+        function increaseCartQuantity(productId) {
+
+            changeCartQuantity(productId, 1);
+
+        }
+
+
+
+        // ==========================================
+        // DECREASE QUANTITY
+        // ==========================================
+
+        function decreaseCartQuantity(productId) {
+
+            changeCartQuantity(productId, -1);
+
+        }
+
+
+
+        // ==========================================
+        // REMOVE CART ITEM
+        // ==========================================
+
+        function removeCartItem(productId) {
+
+            if (!cartReady) {
+                return;
+            }
+
+            const id = Number(productId);
+
+
+            // Find the selected product.
+
+            const index = cart.findIndex(
+                item => Number(item) === id
+            );
+
+
+            // Remove the product.
+
+            if (index !== -1) {
+
+                cart.splice(index, 1);
+
+            }
+
+
+            // Remove the saved quantity.
+
+            delete cartQty[id];
+
+
+            // Save the cart.
+
+            if (typeof persist === "function") {
+
+                persist();
+
+            } else {
+
+                localStorage.setItem(
+                    "artify_cart",
+                    JSON.stringify(cart)
+                );
+
+                localStorage.setItem(
+                    "artify_cart_qty",
+                    JSON.stringify(cartQty)
+                );
+
+            }
+
+
+            // If the cart becomes empty, clear the coupon.
+
+            if (cart.length === 0) {
+
+                appliedCoupon = "";
+
+                couponFeedback = {
+                    message: "",
+                    type: ""
+                };
+
+                saveAppliedCoupon();
+
+            } else if (appliedCoupon === "ARTIFY100") {
+
+                const totals = calculateCartTotals();
+
+                if (totals.subtotal < 999) {
+
+                    appliedCoupon = "";
+
+                    saveAppliedCoupon();
+
+                    couponFeedback = {
+                        message: "Add items worth ₹999 or more to use ARTIFY100.",
+                        type: "error"
+                    };
+                }
+            }
+
+
+            renderCart();
+        }
+
+
+
+        // ==========================================
+        // INITIALIZE CART
+        // ==========================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+
+            async function () {
+
+                const target =
+                    document.getElementById("content");
+
+
+                try {
+
+                    // Restore the saved coupon.
+
+                    appliedCoupon =
+                        localStorage.getItem(
+                            "artifyAppliedCoupon"
+                        ) || "";
+
+
+                    // Load the latest product prices.
+
+                    await refreshCartProductPrices();
+
+
+                    // Mark the cart as ready.
+
+                    cartReady = true;
+
+
+                    // Validate any previously saved coupon.
+
+                    if (appliedCoupon === "ARTIFY100") {
+
+                        const totals = calculateCartTotals();
+
+                        if (totals.subtotal < 999) {
+
+                            appliedCoupon = "";
+
+                            saveAppliedCoupon();
+
+                            couponFeedback = {
+                                message: "Add items worth ₹999 or more to use ARTIFY100.",
+                                type: "error"
+                            };
+
+                        } else {
+
+                            couponFeedback = {
+                                message: "Coupon applied! ₹100 discount added.",
+                                type: "success"
+                            };
+
+                        }
+                    }
+
+
+                    // Display the cart.
+
+                    renderCart();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Cart initialization failed:",
+                        error
+                    );
+
+                    cartLoadingError = true;
+
+
+                    if (target) {
+
+                        target.innerHTML = `
+
+                            <div class="cart-error">
+
+                                <h2>
+                                    Unable to load your cart
+                                </h2>
+
+                                <p>
+                                    We couldn't load the latest product prices
+                                    from the server.
+                                </p>
+
+                                <p>
+                                    Please check that your Artify server is running.
+                                </p>
+
+                                <button
+                                    class="btn"
+                                    type="button"
+                                    onclick="window.location.reload()"
+                                >
+                                    Try Again
+                                </button>
+
+                            </div>
+
+                        `;
+                    }
+                }
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

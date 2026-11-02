@@ -1,0 +1,401 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>About Artify | Our Story</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .about-hero {
+            padding: clamp(45px, 8vw, 100px);
+            border-radius: 28px;
+            background: linear-gradient(
+                130deg,
+                #e8c2ad,
+                #f1dfb4 55%,
+                #cdd9bf
+            );
+            color: #34251f;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-hero:after {
+            content: '✿';
+            position: absolute;
+            font-size: clamp(10rem, 25vw, 24rem);
+            right: -1%;
+            bottom: -35%;
+            opacity: 0.16;
+        }
+
+        .about-hero h1 {
+            font-size: clamp(2.8rem, 7vw, 6rem);
+            line-height: 0.98;
+            letter-spacing: -0.06em;
+            max-width: 780px;
+        }
+
+        .about-hero p {
+            max-width: 700px;
+            line-height: 1.9;
+            font-size: 1.1rem;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin: 28px 0;
+        }
+
+        .about-value {
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--surface);
+        }
+
+        .about-value span {
+            font-size: 2.4rem;
+        }
+
+        .about-value p,
+        .about-copy p {
+            line-height: 1.9;
+            color: var(--muted);
+        }
+
+        .about-copy {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 5vw;
+            padding: 70px 0;
+        }
+
+        .about-copy h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            letter-spacing: -0.04em;
+        }
+
+        .about-callout {
+            padding: 35px;
+            border-left: 4px solid var(--accent);
+            background: var(--surface);
+            font: clamp(1.5rem, 3vw, 2.6rem) / 1.3 Georgia, serif;
+        }
+
+        .about-pillars {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .about-pillars div {
+            padding: 22px 15px;
+            border-radius: 16px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+        }
+
+        @media (max-width: 700px) {
+            .about-grid,
+            .about-copy {
+                grid-template-columns: 1fr;
+            }
+
+            .about-pillars {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container page-pad">
+
+        <!-- About Hero Section -->
+        <section class="about-hero">
+
+            <div class="eyebrow">
+                THE PEOPLE AND PURPOSE BEHIND THE PIECES
+            </div>
+
+            <h1>
+                Art for living.<br>
+                <em>Craft for keeping.</em>
+            </h1>
+
+            <p>
+                Artify is a handmade marketplace shaped by the belief
+                that everyday objects can hold meaning. We bring together
+                creative categories, thoughtful gifting and the joy of
+                discovering something made with intention.
+            </p>
+
+            <div>🎨 ✿ ♡ ✧ 🧶 ✦ 💍</div>
+
+        </section>
+
+        <!-- Who We Are Section -->
+        <section class="home-section">
+
+            <div class="eyebrow">WHO WE ARE</div>
+
+            <h2>A marketplace with a human heartbeat.</h2>
+
+            <p
+                class="muted"
+                style="max-width: 850px; line-height: 1.9;"
+            >
+                Artify is imagined as a welcoming online studio for
+                handmade art and crafts. Instead of treating products
+                as anonymous items on a shelf, we celebrate the
+                imagination, time and care that go into each kind
+                of creation. Our collection spans paintings, crochet,
+                jewellery, bouquets, crafts and home décor — giving
+                shoppers a place to find pieces for their homes,
+                their celebrations and the people they love.
+            </p>
+
+            <div class="about-grid">
+
+                <article class="about-value">
+                    <span>🌱</span>
+
+                    <h3>Made with intention</h3>
+
+                    <p>
+                        We value considered design, expressive details
+                        and the charm of work that feels personal
+                        rather than mass-produced.
+                    </p>
+                </article>
+
+                <article class="about-value">
+                    <span>🎁</span>
+
+                    <h3>Gifting with feeling</h3>
+
+                    <p>
+                        A handmade gift can carry a memory, a message
+                        or a small reminder that someone matters.
+                        We make discovery easier.
+                    </p>
+                </article>
+
+                <article class="about-value">
+                    <span>🪡</span>
+
+                    <h3>Creative variety</h3>
+
+                    <p>
+                        From wall art to wearable keepsakes, our
+                        different categories offer many ways to
+                        bring creativity into everyday life.
+                    </p>
+                </article>
+
+            </div>
+
+        </section>
+
+        <!-- Our Mission Section -->
+        <section class="about-copy">
+
+            <div>
+                <div class="eyebrow">OUR MISSION ♡</div>
+
+                <h2>Make meaningful things easier to find.</h2>
+            </div>
+
+            <div>
+
+                <p>
+                    Our mission is to make handmade shopping feel
+                    both inspiring and straightforward. Visitors
+                    can explore products, search by name or category,
+                    use price and rating filters, switch between
+                    grid and list views, save favourites, manage
+                    a cart, request custom art and follow their
+                    order history.
+                </p>
+
+                <p>
+                    We want the digital experience to feel considered
+                    too: an accessible layout, smooth navigation,
+                    readable product information, a global light/dark
+                    theme, helpful support pages and a clear sample
+                    checkout journey.
+                </p>
+
+                <p>
+                    Artify is a demo project, so its checkout simulates
+                    a payment result and does not charge real money.
+                    The experience is designed to demonstrate how
+                    the customer journey can work from discovery
+                    through order tracking.
+                </p>
+
+                <div class="about-callout">
+                    “The little details are often the things that
+                    make a place — or a gift — feel like it was
+                    made just for you.”
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Our Creative Journey Section -->
+        <section class="home-section">
+
+            <div class="eyebrow">OUR CREATIVE JOURNEY</div>
+
+            <h2>Idea → Design → Handmade → Artify</h2>
+
+            <p class="muted">
+                Every piece begins with a spark. It becomes a sketch,
+                a combination of materials, a careful process and
+                finally something ready to be found by the right person.
+            </p>
+
+            <div class="journey-flow">
+
+                <div class="journey-step">
+                    <span class="step-icon">💡</span>
+
+                    <strong>Imagine</strong>
+
+                    <p>
+                        A feeling, a use or a story starts the idea.
+                    </p>
+                </div>
+
+                <div class="journey-step">
+                    <span class="step-icon">✏️</span>
+
+                    <strong>Shape</strong>
+
+                    <p>
+                        Colours, textures and details find their place.
+                    </p>
+                </div>
+
+                <div class="journey-step">
+                    <span class="step-icon">👐</span>
+
+                    <strong>Create</strong>
+
+                    <p>
+                        Time and skill turn an idea into a piece.
+                    </p>
+                </div>
+
+                <div class="journey-step">
+                    <span class="step-icon">♡</span>
+
+                    <strong>Share</strong>
+
+                    <p>
+                        The finished treasure finds a new home.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Our Values Section -->
+        <section class="home-section">
+
+            <div class="eyebrow">WHAT WE BELIEVE IN</div>
+
+            <div class="about-pillars">
+
+                <div>
+                    ✨
+
+                    <h3>Creativity</h3>
+
+                    <p class="muted">
+                        Room to experiment and express.
+                    </p>
+                </div>
+
+                <div>
+                    🤲
+
+                    <h3>Care</h3>
+
+                    <p class="muted">
+                        Respect for the work behind each piece.
+                    </p>
+                </div>
+
+                <div>
+                    🌈
+
+                    <h3>Individuality</h3>
+
+                    <p class="muted">
+                        Objects that feel personal.
+                    </p>
+                </div>
+
+                <div>
+                    💌
+
+                    <h3>Connection</h3>
+
+                    <p class="muted">
+                        Gifts and spaces full of meaning.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Final Call-to-Action Section -->
+        <section class="home-ending">
+
+            <div class="final-mark">✿ ✧ ♡</div>
+
+            <h2>Thank you for choosing handmade.</h2>
+
+            <p class="muted">
+                Every visit, every saved favourite and every thoughtful
+                gift is part of the story. We are glad you found your
+                way to Artify.
+            </p>
+
+            <a class="btn" href="products.html">
+                Explore Products 
+            </a>
+
+        </section>
+
+    </main>
+
+    <!-- JavaScript Files -->
+    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', simplePage);
+    </script>
+
+</body>
+
+</html>
+```

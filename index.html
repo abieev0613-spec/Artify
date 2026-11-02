@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Artify | Handmade With Love</title>
+
+<script>
+    (function () {
+        try {
+            if (localStorage.getItem("artify_theme") === "dark") {
+                document.documentElement.classList.add("dark");
+            }
+        } catch (error) {
+            // Use the default light theme if storage is unavailable.
+        }
+    })();
+</script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        color-scheme: light;
+        --background: #fbf4ed;
+        --text: #563b2c;
+        --accent: #b77b60;
+        --glow: rgba(220, 169, 142, 0.35);
+    }
+
+    :root.dark {
+        color-scheme: dark;
+        --background: #171513;
+        --text: #f5e8dc;
+        --accent: #d6a486;
+        --glow: rgba(165, 112, 86, 0.22);
+    }
+
+    html,
+    body {
+        width: 100%;
+        min-height: 100%;
+    }
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: hidden;
+        background: var(--background);
+        color: var(--text);
+        font-family: Georgia, "Times New Roman", serif;
+        transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    .transition-screen {
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: hidden;
+        background: var(--background);
+        transition: opacity 0.7s ease, background 0.5s ease;
+    }
+
+    .glow {
+        position: absolute;
+        z-index: -1;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: var(--glow);
+        filter: blur(65px);
+        animation: float 6s ease-in-out infinite alternate;
+        pointer-events: none;
+    }
+
+    .glow-one {
+        top: 10%;
+        left: 10%;
+    }
+
+    .glow-two {
+        right: 8%;
+        bottom: 8%;
+        animation-delay: -3s;
+    }
+
+    .artify-content {
+        padding: 24px;
+        text-align: center;
+        animation: reveal 1.2s ease both;
+    }
+
+    .artify-symbol {
+        margin-bottom: 18px;
+        color: var(--accent);
+        font-size: clamp(30px, 5vw, 48px);
+        animation: symbolFloat 2.5s ease-in-out infinite;
+    }
+
+    .artify-name {
+        color: var(--text);
+        font-size: clamp(38px, 9vw, 76px);
+        font-weight: normal;
+        letter-spacing: 0.2em;
+        text-indent: 0.2em;
+    }
+
+    .artify-line {
+        width: 100px;
+        height: 1px;
+        margin: 20px auto;
+        background: var(--accent);
+        animation: lineReveal 1.2s ease both;
+    }
+
+    .artify-tagline {
+        color: var(--text);
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        opacity: 0.75;
+    }
+
+    body.leaving .transition-screen {
+        opacity: 0;
+    }
+
+    @keyframes reveal {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes lineReveal {
+        from {
+            width: 0;
+        }
+
+        to {
+            width: 100px;
+        }
+    }
+
+    @keyframes float {
+        from {
+            transform: translate(0, 0) scale(0.9);
+        }
+
+        to {
+            transform: translate(25px, -20px) scale(1.15);
+        }
+    }
+
+    @keyframes symbolFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+    <main class="transition-screen">
+        <div class="glow glow-one"></div>
+        <div class="glow glow-two"></div>
+
+
+    <section class="artify-content">
+        <div class="artify-symbol" aria-hidden="true">✿</div>
+
+        <h1 class="artify-name">ARTIFY</h1>
+
+        <div class="artify-line"></div>
+
+        <p class="artify-tagline">Handmade With Love</p>
+    </section>
+</main>
+
+<script>
+    (function () {
+        const savedTheme = document.documentElement.classList.contains("dark")
+            ? "dark"
+            : "light";
+
+        document.documentElement.classList.toggle(
+            "dark",
+            savedTheme === "dark"
+        );
+
+        window.setTimeout(function () {
+            document.body.classList.add("leaving");
+
+            window.setTimeout(function () {
+                window.location.replace("home.html");
+            }, 750);
+        }, 2200);
+    })();
+</script>
+
+</body>
+</html>
