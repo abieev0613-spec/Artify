@@ -117,7 +117,7 @@ Object.entries(categoryData).forEach(([category, names]) =>
         ((index * 7) % 9) / 10
       ).toFixed(1),
       description: `A thoughtfully handmade ${category.toLowerCase()} piece designed to bring warmth, character and a personal touch to your space.`,
-      image: `images/products/${String(nextId - 1)
+      image: `${String(nextId - 1)
         .padStart(2, '0')}-${name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
