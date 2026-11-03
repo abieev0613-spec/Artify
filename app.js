@@ -21,7 +21,7 @@ let cart = JSON.parse(
 );
 
 let cartQty = JSON.parse(
-    localStorage.getItem('artify_cart_qty') || '{}'
+    localStorage.getItem('_cart_qty') || '{}'
 );
 
 let wishlist = JSON.parse(
@@ -239,7 +239,7 @@ function header() {
                     <span class="brand-mark">✿</span>
 
                     <span>
-                        Artify
+                        Artify64
                         <small>THE HANDMADE UNIVERSE</small>
                     </span>
 
